@@ -1,0 +1,14 @@
+    {
+        "2025-07-10": [
+            { "time": "09:00 AM - 01:00 PM", "artist": "Sandun Samantha", "task": "Morning Show Makeup" },
+            { "time": "01:00 PM - 05:00 PM", "artist": "Amila Dilruksha", "task": "Afternoon Program Touch-ups" },
+            { "time": "05:00 PM - 09:00 PM", "artist": "Udayanga Fernando", "task": "Evening News & Drama Makeup" }
+        ],
+        "2025-07-11": [
+            { "time": "09:00 AM - 01:00 PM", "artist":"Malki Perera", "task": "Morning Program Prep" },
+            { "time": "01:00 PM - 05:00 PM", "artist": "Buddika Nuwan", "task": "Outdoor Shoot" }
+        ],
+        "2025-07-12": [
+            { "time": "10:00 AM - 06:00 PM", "artist": "Sahara De Silva", "task": "Weekend Special Program" }
+        ]
+    }
