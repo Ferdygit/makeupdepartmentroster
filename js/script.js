@@ -1,36 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Main UI Elements
-    const dateInput = document.getElementById('rosterDate');
+    // --- Main UI Elements ---
+    const dateInput = document.getElementById('rosterDateInput'); // Corrected ID from 'rosterDate' to 'rosterDateInput'
     const dailyRosterContent = document.getElementById('dailyRosterContent');
     const selectedDateHeader = document.getElementById('selectedDateHeader');
     const noRosterMessage = document.getElementById('noRosterMessage');
     const artistsContainer = document.getElementById('artistsContainer');
 
-    // Admin Panel Elements
-    const adminLoginBtn = document.getElementById('adminLoginBtn'); // Main header button
-    const adminPanel = document.getElementById('adminPanel'); // The modal container
-    const closeAdminPanel = document.getElementById('closeAdminPanel'); // Close button on panel
+    // --- Admin Panel Elements ---
+    const adminLoginBtn = document.getElementById('adminLoginBtn'); // Main header button (e.g., in your nav)
+    const adminPanel = document.getElementById('adminPanel'); // The entire admin panel modal/container
+    const closeAdminPanelBtn = document.getElementById('closeAdminPanelBtn'); // Close button inside the admin panel
     
-    // Login form elements
+    // Login form elements (these should be *inside* adminPanel and potentially nested further)
+    const adminLoginFormContainer = document.getElementById('adminLoginFormContainer'); // Assuming a container for the login form
     const adminLoginForm = document.getElementById('adminLoginForm');
     const adminUsernameInput = document.getElementById('adminUsername');
     const adminPasswordInput = document.getElementById('adminPassword');
-    const loginButton = document.getElementById('loginButton'); // Login button in form
+    const loginButton = document.getElementById('loginButton');
     const loginMessage = document.getElementById('loginMessage');
 
-    // Admin features container (hidden until login)
+    // Admin features container (visible after login, within adminPanel)
     const adminFeatures = document.getElementById('adminFeatures'); 
-    const logoutButton = document.getElementById('logoutButton'); // Logout button in features
+    const logoutButton = document.getElementById('logoutButton');
 
     // Admin tab navigation
-    const adminTabs = document.querySelector('.admin-tabs'); // Parent for tab buttons
-    // No specific variables for sections, we target them by ID via data-tab attribute
+    const adminTabs = document.querySelector('.admin-tabs'); 
 
-    // Admin forms and their messages
-    const rosterDateInput = document.getElementById('rosterDateInput'); // Roster form date
-    const rosterArtistSelect = document.getElementById('rosterArtist'); // Roster form artist dropdown
-    const rosterTimeSlotInput = document.getElementById('rosterTimeSlot'); // Roster form time slot
-    const rosterProgrammeSelect = document.getElementById('rosterProgramme'); // Roster form programme dropdown
+    // Admin forms and their messages (elements within adminFeatures)
+    const rosterDateInputAdmin = document.getElementById('rosterDateInput'); // Admin Roster form date input
+    const rosterArtistSelect = document.getElementById('rosterArtist');
+    const rosterTimeSlotInput = document.getElementById('rosterTimeSlot');
+    const rosterProgrammeSelect = document.getElementById('rosterProgramme');
     const rosterForm = document.getElementById('rosterForm');
     const rosterFormMessage = document.getElementById('rosterFormMessage');
 
@@ -39,16 +39,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const newArtistSpecialtyInput = document.getElementById('newArtistSpecialty');
     const newArtistPhotoURLInput = document.getElementById('newArtistPhotoURL');
     const addArtistFormMessage = document.getElementById('addArtistFormMessage');
-    const existingArtistsList = document.getElementById('existingArtistsList'); // To display existing artists
+    const existingArtistsList = document.getElementById('existingArtistsList');
 
     const addProgrammeForm = document.getElementById('addProgrammeForm');
     const newProgrammeNameInput = document.getElementById('newProgrammeName');
     const newProgrammeDescriptionInput = document.getElementById('newProgrammeDescription');
     const newProgrammePhotoInput = document.getElementById('newProgrammePhoto');
     const addProgrammeFormMessage = document.getElementById('addProgrammeFormMessage');
-    const existingProgrammesList = document.getElementById('existingProgrammesList'); // To display existing programmes
+    const existingProgrammesList = document.getElementById('existingProgrammesList');
 
-    // New "Add New" Buttons next to dropdowns
+    // "Add New" Buttons next to dropdowns
     const addNewArtistBtn = document.getElementById('addNewArtistBtn');
     const addNewProgrammeBtn = document.getElementById('addNewProgrammeBtn');
 
@@ -62,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Core Data Fetching Functions ---
 
-    // Function to fetch Roster data
     const fetchRosterData = async () => {
         try {
             const response = await fetch(`${API_URL}?sheet=Roster`);
@@ -90,18 +89,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const dd = String(today.getDate()).padStart(2, '0');
             const todayString = `${yyyy}-${mm}-${dd}`;
 
-            dateInput.value = todayString;
+            if (dateInput) { // Ensure dateInput exists before setting value
+                dateInput.value = todayString;
+            }
             displayRoster(todayString);
 
         } catch (error) {
             console.error('Could not fetch the roster data:', error);
-            dailyRosterContent.innerHTML = '<p>Error loading roster data. Please try again later.</p>';
-            selectedDateHeader.textContent = 'Error loading roster.';
-            noRosterMessage.classList.add('hidden');
+            if (dailyRosterContent) {
+                dailyRosterContent.innerHTML = '<p>Error loading roster data. Please try again later.</p>';
+                selectedDateHeader.textContent = 'Error loading roster.';
+                noRosterMessage.classList.add('hidden');
+            }
         }
     };
 
-    // Function to fetch Artists data
     const fetchArtistsData = async () => {
         try {
             const response = await fetch(`${API_URL}?sheet=Artists`);
@@ -122,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Function to fetch Programmes data
     const fetchProgrammesData = async () => {
         try {
             const response = await fetch(`${API_URL}?sheet=Programmes`);
@@ -141,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Display Functions (Frontend) ---
 
-    // Function to display Artists (main page)
     const displayArtists = (artists) => {
         if (!artistsContainer) return;
 
@@ -151,11 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (departmentHead) {
             const headGroup = document.createElement('div');
             headGroup.classList.add('artist-group', 'department-head-group');
+            // Using artist.PhotoURL if available, otherwise fallback to local path
+            const photoSrc = departmentHead.PhotoURL || `./Images/${departmentHead['Artist Name'].replace(/\s/g, '-')}.jpg`;
             headGroup.innerHTML = `
                 <h3 class="card-subtitle">Department Head</h3>
                 <div class="artist-card department-head-card">
                     <div class="artist-info">
-                        <img src="./Images/${departmentHead['Artist Name'].replace(/\s/g, '-')}.jpg" alt="${departmentHead['Artist Name']}" class="artist-photo">
+                        <img src="${photoSrc}" alt="${departmentHead['Artist Name']}" class="artist-photo">
                         <div>
                             <p class="artist-name">${departmentHead['Artist Name']}</p>
                             <p class="artist-description">${departmentHead.Specialty}</p>
@@ -178,8 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
             talentedTeam.forEach(artist => {
                 const artistCard = document.createElement('div');
                 artistCard.classList.add('artist-card');
+                const photoSrc = artist.PhotoURL || `./Images/${artist['Artist Name'].replace(/\s/g, '-')}.jpg`;
                 artistCard.innerHTML = `
-                    <img src="./Images/${artist['Artist Name'].replace(/\s/g, '-')}.jpg" alt="${artist['Artist Name']}" class="artist-photo">
+                    <img src="${photoSrc}" alt="${artist['Artist Name']}" class="artist-photo">
                     <h4>${artist['Artist Name']}</h4>
                     <p>${artist.Specialty}</p>
                 `;
@@ -189,12 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Function to display Roster for a selected date (main page)
     const displayRoster = (date) => { 
         const entries = allRosterData[date]; 
-        dailyRosterContent.innerHTML = '';
-        noRosterMessage.classList.add('hidden');
-        selectedDateHeader.textContent = `Roster for ${new Date(date).toDateString()}:`; 
+        if (dailyRosterContent) dailyRosterContent.innerHTML = '';
+        if (noRosterMessage) noRosterMessage.classList.add('hidden');
+        if (selectedDateHeader) selectedDateHeader.textContent = `Roster for ${new Date(date).toDateString()}:`; 
 
         if (entries && entries.length > 0) {
             const groupedByProgramme = entries.reduce((acc, entry) => {
@@ -211,9 +213,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const programmeElement = document.createElement('div');
                 programmeElement.classList.add('roster-programme-group');
 
+                const programmeData = allProgrammesData.find(p => p['Program Name'] === programmeName);
+                const programmeThumbSrc = programmeData && programmeData.PhotoURL 
+                                          ? programmeData.PhotoURL 
+                                          : 'images/programme-placeholder.png'; // Fallback
+
                 const programmeNameElement = document.createElement('h4');
                 programmeNameElement.classList.add('roster-program-name');
-                programmeNameElement.innerHTML = `<img src="images/programme-placeholder.png" class="programme-thumb" alt="${programmeName}"> ${programmeName}`;
+                programmeNameElement.innerHTML = `<img src="${programmeThumbSrc}" class="programme-thumb" alt="${programmeName}"> ${programmeName}`;
                 programmeElement.appendChild(programmeNameElement);
 
                 const ul = document.createElement('ul');
@@ -223,29 +230,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     ul.appendChild(li);
                 });
                 programmeElement.appendChild(ul);
-                dailyRosterContent.appendChild(programmeElement);
+                if (dailyRosterContent) dailyRosterContent.appendChild(programmeElement);
             }
         } else {
-            dailyRosterContent.innerHTML = '';
-            noRosterMessage.classList.remove('hidden');
-            selectedDateHeader.textContent = `No roster entries for ${new Date(date).toDateString()}.`;
+            if (dailyRosterContent) dailyRosterContent.innerHTML = '';
+            if (noRosterMessage) noRosterMessage.classList.remove('hidden');
+            if (selectedDateHeader) selectedDateHeader.textContent = `No roster entries for ${new Date(date).toDateString()}.`;
         }
     };
 
     // --- Admin Panel Logic ---
 
-    // Helper to clear and show form message
     const showFormMessage = (messageElement, message, isError = false) => {
+        if (!messageElement) return; // Add check for element
         messageElement.textContent = message;
         messageElement.style.color = isError ? 'red' : 'green';
         setTimeout(() => {
             messageElement.textContent = '';
-        }, 5000); // Message disappears after 5 seconds
+        }, 5000);
     };
 
-    // Populate dropdowns in admin Roster form
     const populateArtistDropdown = (artists) => {
-        rosterArtistSelect.innerHTML = '<option value="">Select Artist</option>'; // Clear and add default
+        if (!rosterArtistSelect) return;
+        rosterArtistSelect.innerHTML = '<option value="">Select Artist</option>';
         artists.forEach(artist => {
             const option = document.createElement('option');
             option.value = artist['Artist Name'];
@@ -255,20 +262,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const populateProgrammeDropdown = (programmes) => {
-        rosterProgrammeSelect.innerHTML = '<option value="">Select Programme</option>'; // Clear and add default
+        if (!rosterProgrammeSelect) return;
+        rosterProgrammeSelect.innerHTML = '<option value="">Select Programme</option>';
         programmes.forEach(prog => {
-            // IMPORTANT: Ensure 'Name' matches the column header in your 'Programmes' Google Sheet
             const option = document.createElement('option');
-            option.value = prog['Program Name']; // Assuming your Programme sheet has a 'Name' column
+            option.value = prog['Program Name'];
             option.textContent = prog['Program Name'];
             rosterProgrammeSelect.appendChild(option);
         });
     };
 
-    // Display existing artists in the "Manage Artists" section
     const displayExistingArtists = (artists) => {
         if (!existingArtistsList) return;
-        existingArtistsList.innerHTML = ''; // Clear previous entries
+        existingArtistsList.innerHTML = '';
         if (artists.length === 0) {
             existingArtistsList.innerHTML = '<li>No artists found.</li>';
             return;
@@ -286,17 +292,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Display existing programmes in the "Manage Programmes" section
     const displayExistingProgrammes = (programmes) => {
         if (!existingProgrammesList) return;
-        existingProgrammesList.innerHTML = ''; // Clear previous entries
+        existingProgrammesList.innerHTML = '';
         if (programmes.length === 0) {
             existingProgrammesList.innerHTML = '<li>No programmes found.</li>';
             return;
         }
         programmes.forEach(prog => {
             const li = document.createElement('li');
-            // IMPORTANT: Ensure 'Name' and 'Description' match column headers in your 'Programmes' Google Sheet
             li.innerHTML = `
                 <span>${prog['Program Name']} - ${prog.Description || 'No description'}</span>
                 <div>
@@ -308,12 +312,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-
-    // Toggle admin panel visibility
     const showAdminPanel = () => {
-        adminPanel.classList.remove('hidden');
-        // Reset admin panel state on open
-        adminLoginForm.classList.remove('hidden'); // Show login form initially
+        if (!adminPanel || !adminLoginFormContainer || !adminFeatures || !loginMessage || !adminUsernameInput || !adminPasswordInput) return;
+        adminPanel.classList.remove('hidden'); // Show the main admin panel modal
+        adminLoginFormContainer.classList.remove('hidden'); // Show login form
         adminFeatures.classList.add('hidden'); // Hide features
         loginMessage.textContent = ''; // Clear login message
         adminUsernameInput.value = ''; // Clear inputs
@@ -321,39 +323,50 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const hideAdminPanel = () => {
-        adminPanel.classList.add('hidden');
+        if (!adminPanel || !adminLoginFormContainer || !adminFeatures || !loginMessage || !adminUsernameInput || !adminPasswordInput) return;
+        adminPanel.classList.add('hidden'); // Hide the main admin panel modal
         loginMessage.textContent = ''; 
         adminUsernameInput.value = ''; 
         adminPasswordInput.value = '';
-        adminLoginForm.classList.remove('hidden'); 
+        // When hiding the admin panel, reset to login state for next open
+        adminLoginFormContainer.classList.remove('hidden'); 
         adminFeatures.classList.add('hidden'); 
-        // Reset active tab to Roster when closing
-        document.querySelector('.admin-tabs .active-tab')?.classList.remove('active-tab');
-        document.querySelector('.admin-section.active-section')?.classList.remove('active-section');
-        // Set 'Update Roster' as the default active tab and section on logout/close
-        document.querySelector('.admin-tabs button[data-tab="updateRoster"]')?.classList.add('active-tab');
-        document.getElementById('updateRoster')?.classList.add('active-section');
+        // Reset active tab to Roster when closing/logging out
+        document.querySelectorAll('.admin-tabs button').forEach(button => button.classList.remove('active-tab'));
+        document.querySelectorAll('.admin-section').forEach(section => section.classList.add('hidden'));
+        
+        // Explicitly set 'Update Roster' as the default active tab and section
+        const updateRosterTab = document.querySelector('.admin-tabs button[data-tab="updateRoster"]');
+        const updateRosterSection = document.getElementById('updateRoster');
+        if (updateRosterTab) updateRosterTab.classList.add('active-tab');
+        if (updateRosterSection) updateRosterSection.classList.remove('hidden'); // Use remove('hidden') here
     };
 
-    // Function to handle tab switching in admin panel
     const handleAdminTabClick = (event) => {
-        if (event.target.classList.contains('tab-button')) {
-            console.log('Tab button clicked:', event.target.dataset.tab);
-            // Remove active class from all buttons and sections
+        const targetButton = event.target.closest('.tab-button'); // Use closest for better click target detection
+        if (targetButton) {
+            console.log('Tab button clicked:', targetButton.dataset.tab);
+            
+            // Remove active class from all buttons
             document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active-tab'));
+            // Hide all admin sections
             document.querySelectorAll('.admin-section').forEach(section => section.classList.add('hidden'));
 
-            // Add active class to clicked button and corresponding section
-            event.target.classList.add('active-tab');
-            const targetTabId = event.target.dataset.tab;
-            console.log('Switching to tab:', targetTabId);
-            document.getElementById(targetTabId).classList.remove('hidden');
+            // Add active class to clicked button
+            targetButton.classList.add('active-tab');
+            const targetTabId = targetButton.dataset.tab;
+            console.log('Switching to tab section:', targetTabId);
+            
+            // Show the corresponding section
+            const targetSection = document.getElementById(targetTabId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
         }
     };
 
     // --- Event Listeners ---
 
-    // Event listener for date input change (main roster display)
     if (dateInput) {
         dateInput.addEventListener('change', (event) => {
             const selectedDate = event.target.value; 
@@ -366,56 +379,61 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else {
-        console.error("Date input element with ID 'rosterDate' not found.");
+        console.error("Date input element with ID 'rosterDateInput' not found.");
     }
 
-    // Admin Login button in header
     if (adminLoginBtn) {
         adminLoginBtn.addEventListener('click', showAdminPanel);
     }
 
     // Close button inside admin panel
-    if (closeAdminPanel) {
-        closeAdminPanel.addEventListener('click', hideAdminPanel);
+    if (closeAdminPanelBtn) { // Changed to closeAdminPanelBtn
+        closeAdminPanelBtn.addEventListener('click', hideAdminPanel);
+    } else {
+        console.error("Close button element with ID 'closeAdminPanelBtn' not found.");
     }
 
-    // Login button logic (within the admin panel)
     if (loginButton) {
         loginButton.addEventListener('click', () => {
             const username = adminUsernameInput.value;
             const password = adminPasswordInput.value;
 
-            // --- IMPORTANT: This is a TEMPORARY, client-side-only check! ---
-            // DO NOT use this for real security.
-            // This will be replaced with a backend API call in the next step.
-            if (username === 'admin' && password === 'password123') { // Example credentials
-                loginMessage.textContent = 'Login successful!';
-                loginMessage.style.color = 'green';
-                adminLoginForm.classList.add('hidden'); // Hide login form
+            if (username === 'admin' && password === 'password123') { 
+                showFormMessage(loginMessage, 'Login successful!', false);
+                adminLoginFormContainer.classList.add('hidden'); // Hide login form container
                 adminFeatures.classList.remove('hidden'); // Show admin features
-                
+
                 // Fetch data for dropdowns and lists when admin logs in
                 fetchProgrammesData();
+                fetchArtistsData(); // Re-fetch artists to ensure dropdown is updated
 
                 // Set the current roster date input in admin panel to today's date
                 const today = new Date();
                 const yyyy = today.getFullYear();
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
                 const dd = String(today.getDate()).padStart(2, '0');
-                rosterDateInput.value = `${yyyy}-${mm}-${dd}`;
+                if (rosterDateInputAdmin) { // Check before setting value
+                    rosterDateInputAdmin.value = `${yyyy}-${mm}-${dd}`;
+                }
+                
+                // Set 'Update Roster' as the default active tab after login
+                const updateRosterTab = document.querySelector('.admin-tabs button[data-tab="updateRoster"]');
+                const updateRosterSection = document.getElementById('updateRoster');
+                document.querySelectorAll('.admin-tabs button').forEach(btn => btn.classList.remove('active-tab'));
+                document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('hidden'));
+                if (updateRosterTab) updateRosterTab.classList.add('active-tab');
+                if (updateRosterSection) updateRosterSection.classList.remove('hidden');
+
             } else {
-                loginMessage.textContent = 'Invalid username or password.';
-                loginMessage.style.color = 'red';
+                showFormMessage(loginMessage, 'Invalid username or password.', true);
             }
         });
     }
 
-    // Logout button logic
     if (logoutButton) {
         logoutButton.addEventListener('click', hideAdminPanel);
     }
 
-    // Admin tab navigation click listener
     if (adminTabs) {
         adminTabs.addEventListener('click', handleAdminTabClick);
     }
@@ -423,81 +441,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for "Add New" buttons
     if (addNewArtistBtn) {
         addNewArtistBtn.addEventListener('click', () => {
-            // Find the "Manage Artists" tab button and simulate a click
             const manageArtistsTab = document.querySelector('.tab-button[data-tab="manageArtists"]');
             if (manageArtistsTab) {
-                // Manually trigger the tab click logic
-                handleAdminTabClick({ target: manageArtistsTab });
+                manageArtistsTab.click(); // Simulate a click event on the tab button
             }
         });
     }
 
     if (addNewProgrammeBtn) {
         addNewProgrammeBtn.addEventListener('click', () => {
-            // Find the "Manage Programmes" tab button and simulate a click
             const manageProgrammesTab = document.querySelector('.tab-button[data-tab="manageProgrammes"]');
             if (manageProgrammesTab) {
-                // Manually trigger the tab click logic
-                handleAdminTabClick({ target: manageProgrammesTab });
+                manageProgrammesTab.click(); // Simulate a click event on the tab button
             }
         });
     }
 
-
-    // --- Initial Data Fetches when the page loads ---
-    fetchRosterData();
-    fetchArtistsData();
-    // fetchProgrammesData() is called on admin login now for fresh data
-    // They are also called in displayArtists and populateProgrammes (which are called by fetchArtistsData etc)
-
-
-    // --- Placeholder for form submissions (will be implemented with backend calls later) ---
+    // --- Form Submissions (placeholders for API calls) ---
     if (rosterForm) {
         rosterForm.addEventListener('submit', (event) => {
             event.preventDefault();
             const selectedArtist = rosterArtistSelect.value;
             const selectedProgramme = rosterProgrammeSelect.value;
 
-            if (!selectedArtist) {
+            if (!selectedArtist || selectedArtist === "") { // Check for empty string too
                 showFormMessage(rosterFormMessage, 'Please select an Artist.', true);
                 return;
             }
-            if (!selectedProgramme) {
+            if (!selectedProgramme || selectedProgramme === "") { // Check for empty string too
                 showFormMessage(rosterFormMessage, 'Please select a Programme.', true);
                 return;
             }
 
-            // Simulate API call
             console.log('Submitting roster entry:', {
-                date: rosterDateInput.value,
+                date: rosterDateInputAdmin.value, // Use rosterDateInputAdmin for clarity
                 artist: selectedArtist,
                 timeSlot: rosterTimeSlotInput.value,
                 programme: selectedProgramme
             });
 
-            // Show success message
             showFormMessage(rosterFormMessage, 'Roster entry added successfully!', false);
-
-            // Clear the form
             rosterForm.reset();
+            // In a real app, you'd refetch roster data here: fetchRosterData();
         });
     }
 
     if (addArtistForm) {
         addArtistForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            // Simulate API call
             console.log('Submitting new artist:', {
                 name: newArtistNameInput.value,
                 specialty: newArtistSpecialtyInput.value,
                 photoURL: newArtistPhotoURLInput.value
             });
 
-            // Show success message
             showFormMessage(addArtistFormMessage, 'Artist added successfully!', false);
-
-            // Clear the form
             addArtistForm.reset();
+            // In a real app, you'd refetch artists and update dropdowns/lists: fetchArtistsData();
         });
     }
 
@@ -506,18 +506,21 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             const photoFile = newProgrammePhotoInput.files[0];
 
-            // Simulate API call
             console.log('Submitting new programme:', {
                 name: newProgrammeNameInput.value,
                 description: newProgrammeDescriptionInput.value,
                 photo: photoFile ? photoFile.name : 'No photo uploaded'
             });
 
-            // Show success message
             showFormMessage(addProgrammeFormMessage, 'Programme added successfully!', false);
-
-            // Clear the form
             addProgrammeForm.reset();
+            // In a real app, you'd refetch programmes and update dropdowns/lists: fetchProgrammesData();
         });
     }
+
+    // --- Initial Data Fetches when the page loads ---
+    fetchRosterData();
+    fetchArtistsData();
+    // fetchProgrammesData() is called upon successful admin login.
+    // This ensures these dropdowns/lists are populated only when needed by an authenticated user.
 });

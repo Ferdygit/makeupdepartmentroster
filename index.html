@@ -42,111 +42,106 @@
     </main>
 
     <div id="adminPanel" class="admin-panel-container hidden">
-        <div class="admin-panel-content">
-            <h2 class="admin-panel-title">Admin Panel</h2>
-            <button id="closeAdminPanel" class="close-btn">&times;</button>
+    <div class="admin-panel-content">
+        <button type="button" class="close-btn" id="closeAdminPanelBtn">&times;</button>
+        
+        <div id="adminLoginFormContainer">
+            <h3 class="admin-section-title">Admin Login</h3>
+            <form id="adminLoginForm" class="form-layout">
+                <div class="form-group">
+                    <label for="adminUsername">Username:</label>
+                    <input type="text" id="adminUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Password:</label>
+                    <input type="password" id="adminPassword" required>
+                </div>
+                <button type="button" id="loginButton" class="submit-btn">Login</button>
+                <p id="loginMessage" class="form-message"></p>
+            </form>
+        </div>
 
-            <div id="adminLoginForm">
-                <h3>Admin Login</h3>
-                <label for="adminUsername">Username:</label>
-                <input type="text" id="adminUsername" placeholder="Enter username">
-                <br>
-                <label for="adminPassword">Password:</label>
-                <input type="password" id="adminPassword" placeholder="Enter password">
-                <br>
-                <button id="loginButton" class="btn btn-primary">Login</button>
-                <p id="loginMessage" class="error-message"></p>
+        <div id="adminFeatures" class="admin-features-wrapper hidden"> 
+            <div class="admin-tabs">
+                <button class="tab-button active-tab" data-tab="updateRoster">Update Roster</button>
+                <button class="tab-button" data-tab="manageArtists">Manage Artists</button>
+                <button class="tab-button" data-tab="manageProgrammes">Manage Programmes</button>
             </div>
 
-            <div id="adminFeatures" class="hidden"> 
-                <nav class="admin-tabs">
-                    <button class="tab-button active-tab" data-tab="updateRoster">Update Roster</button>
-                    <button class="tab-button" data-tab="manageArtists">Manage Artists</button>
-                    <button class="tab-button" data-tab="manageProgrammes">Manage Programmes</button>
-                </nav>
-
-               <div id="updateRoster" class="admin-section active-section">
-    <h3 class="admin-section-title">Update Daily Roster</h3>
-    <form id="rosterForm" class="form-layout">
-        <div class="form-group">
-            <label for="rosterDateInput">Date:</label> <input type="date" id="rosterDateInput" name="rosterDate" required>
-        </div>
-
-        <div class="form-group">
-            <label for="rosterArtist">Artist:</label>
-            <div class="input-with-button">
-                <select id="rosterArtist" name="rosterArtist" required>
-                </select>
-                <button type="button" id="addNewArtistBtn" class="add-new-btn">Add New</button>
+            <div id="updateRoster" class="admin-section active-section"> 
+                <h3 class="admin-section-title">Update Daily Roster</h3>
+                <form id="rosterForm" class="form-layout">
+                    <div class="form-group">
+                        <label for="rosterDateInput">Date:</label> <input type="date" id="rosterDateInput" name="rosterDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rosterArtist">Artist:</label>
+                        <div class="input-with-button">
+                            <select id="rosterArtist" name="rosterArtist" required></select>
+                            <button type="button" id="addNewArtistBtn" class="add-new-btn">Add New</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="rosterTimeSlot">Time Slot:</label>
+                        <input type="text" id="rosterTimeSlot" name="rosterTimeSlot" placeholder="e.g., 08.00 AM - 03 PM" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rosterProgramme">Programme:</label>
+                        <div class="input-with-button">
+                            <select id="rosterProgramme" name="rosterProgramme" required></select>
+                            <button type="button" id="addNewProgrammeBtn" class="add-new-btn">Add New</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">Add Roster Entry</button>
+                    <p id="rosterFormMessage" class="form-message"></p>
+                </form>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label for="rosterTimeSlot">Time Slot:</label>
-            <input type="text" id="rosterTimeSlot" name="rosterTimeSlot" placeholder="e.g., 08.00 AM - 03 PM" required>
-        </div>
-
-        <div class="form-group">
-            <label for="rosterProgramme">Programme:</label>
-            <div class="input-with-button">
-                <select id="rosterProgramme" name="rosterProgramme" required>
-                </select>
-                <button type="button" id="addNewProgrammeBtn" class="add-new-btn">Add New</button>
+            <div id="manageArtists" class="admin-section hidden"> 
+                <h3 class="admin-section-title">Manage Artists</h3>
+                <form id="addArtistForm" class="form-layout section-form">
+                    <h4 class="form-section-title">Add New Artist</h4>
+                    <div class="form-group">
+                        <label for="newArtistName">Name:</label>
+                        <input type="text" id="newArtistName" name="newArtistName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newArtistSpecialty">Specialty:</label> <input type="text" id="newArtistSpecialty" name="newArtistSpecialty" placeholder="e.g., Senior Makeup Artist" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newArtistPhotoURL">Photo URL:</label> <input type="url" id="newArtistPhotoURL" name="newArtistPhotoURL" placeholder="e.g., images/new-artist.jpg">
+                    </div>
+                    <button type="submit" class="submit-btn green-btn">Add Artist</button>
+                    <p id="addArtistFormMessage" class="form-message"></p>
+                </form>
+                <h4 class="form-section-title">Existing Artists</h4>
+                <ul id="existingArtistsList" class="existing-list"></ul>
             </div>
-        </div>
 
-        <button type="submit" class="submit-btn">Add Roster Entry</button>
-        <p id="rosterFormMessage" class="form-message"></p>
-    </form>
-</div>
-
-<div id="manageArtists" class="admin-section"> <h3 class="admin-section-title">Manage Artists</h3>
-    <form id="addArtistForm" class="form-layout section-form">
-        <h4 class="form-section-title">Add New Artist</h4>
-        <div class="form-group">
-            <label for="newArtistName">Name:</label>
-            <input type="text" id="newArtistName" name="newArtistName" required>
-        </div>
-        <div class="form-group">
-            <label for="newArtistSpecialty">Specialty:</label> <input type="text" id="newArtistSpecialty" name="newArtistSpecialty" placeholder="e.g., Senior Makeup Artist" required>
-        </div>
-        <div class="form-group">
-            <label for="newArtistPhotoURL">Photo URL:</label> <input type="url" id="newArtistPhotoURL" name="newArtistPhotoURL" placeholder="e.g., images/new-artist.jpg">
-        </div>
-        <button type="submit" class="submit-btn green-btn">Add Artist</button>
-        <p id="addArtistFormMessage" class="form-message"></p>
-    </form>
-
-    <h4 class="form-section-title">Existing Artists</h4>
-    <ul id="existingArtistsList" class="existing-list">
-    </ul>
-</div>
-
-<div id="manageProgrammes" class="admin-section">
-    <h3 class="admin-section-title">Manage Programmes</h3>
-    <form id="addProgrammeForm" class="form-layout section-form">
-        <h4 class="form-section-title">Add New Programme</h4>
-        <div class="form-group">
-            <label for="newProgrammeName">Name:</label>
-            <input type="text" id="newProgrammeName" name="newProgrammeName" required>
-        </div>
-        <div class="form-group">
-            <label for="newProgrammeDescription">Description:</label> <input type="text" id="newProgrammeDescription" name="newProgrammeDescription" placeholder="e.g., Live News Segment" required>
-        </div>
-        <div class="form-group">
-            <label for="newProgrammePhoto">Photo Thumb:</label> <input type="file" id="newProgrammePhoto" name="newProgrammePhoto" accept="image/*">
-        </div>
-        <button type="submit" class="submit-btn green-btn">Add Programme</button>
-        <p id="addProgrammeFormMessage" class="form-message"></p>
-    </form>
-
-    <h4 class="form-section-title">Existing Programmes</h4>
-    <ul id="existingProgrammesList" class="existing-list">
-    </ul>
-</div>
-<button id="logoutButton" class="btn btn-secondary logout-button">Logout</button></div>
+            <div id="manageProgrammes" class="admin-section hidden"> 
+                <h3 class="admin-section-title">Manage Programmes</h3>
+                <form id="addProgrammeForm" class="form-layout section-form">
+                    <h4 class="form-section-title">Add New Programme</h4>
+                    <div class="form-group">
+                        <label for="newProgrammeName">Name:</label>
+                        <input type="text" id="newProgrammeName" name="newProgrammeName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProgrammeDescription">Description:</label> <input type="text" id="newProgrammeDescription" name="newProgrammeDescription" placeholder="e.g., Live News Segment" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProgrammePhoto">Photo Thumb:</label> <input type="file" id="newProgrammePhoto" name="newProgrammePhoto" accept="image/*">
+                    </div>
+                    <button type="submit" class="submit-btn green-btn">Add Programme</button>
+                    <p id="addProgrammeFormMessage" class="form-message"></p>
+                </form>
+                <h4 class="form-section-title">Existing Programmes</h4>
+                <ul id="existingProgrammesList" class="existing-list"></ul>
+            </div>
+            <button id="logoutButton" class="btn btn-secondary logout-button">Logout</button> 
         </div>
     </div>
+</div>
 
     <footer class="main-footer">
         <div class="container">
