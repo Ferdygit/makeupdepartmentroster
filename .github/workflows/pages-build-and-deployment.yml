@@ -24,8 +24,8 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.x' # Or specify your Jekyll's required Ruby version
-          bundler-cache: true # runs 'bundle install' and caches gems
+          ruby-version: '3.3.x' # Use a specific major.minor wildcard if desired
+          bundler-cache: true
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Build with Jekyll
