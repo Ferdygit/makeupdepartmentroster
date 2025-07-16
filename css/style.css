@@ -932,7 +932,7 @@ body {
 }
 
 .admin-section.active-section {
-    display: block;
+    display: block; /* Show only the active section */
 }
 
 .admin-section-title {
