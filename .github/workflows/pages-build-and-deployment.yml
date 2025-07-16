@@ -24,7 +24,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3.x' # Use a specific major.minor wildcard if desired
+          ruby-version: '3.3.8' # Use a specific, exact version from the list
           bundler-cache: true
       - name: Setup Pages
         uses: actions/configure-pages@v5
