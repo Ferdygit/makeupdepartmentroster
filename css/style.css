@@ -119,6 +119,7 @@ body {
     margin-bottom: 25px; /* Spacing between Department Head and Talented Team */
 }
 
+<<<<<<< HEAD
 .artist-group .card-subtitle { /* Changed from h3 to .card-subtitle as per HTML */
     font-size: 1.5em;
     font-weight: bold;
@@ -245,11 +246,101 @@ body {
     font-size: 1rem;
     box-sizing: border-box;
     margin-bottom: 15px;
+=======
+.department-head-group .card-subtitle {
+    color: #4CAF50;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.senior-artists-group .card-subtitle {
+    color: #2196F3;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.makeup-artists-group .card-subtitle {
+    color: #f44336;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.artist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.artist-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.artist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px var(--shadow-color);
+}
+
+.artist-photo {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+.artist-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 10px 0 5px;
+}
+
+.artist-specialty {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Roster Section */
+.roster-display-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 992px) {
+    .roster-display-grid {
+        grid-template-columns: 1fr 2fr;
+    }
+}
+
+.dates-list-panel {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.dates-list-title {
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.date-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+>>>>>>> 25a61095fb424d1c2c19148115540178a393d378
 }
 
 .dates-list {
     list-style: none;
     padding: 0;
+<<<<<<< HEAD
 }
 
 /* No specific .date-item class in HTML, assuming date buttons will be dynamically created */
@@ -327,12 +418,66 @@ body {
 }
 
 /* --- Admin Panel Modal --- */
+=======
+    margin: 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dates-list li button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: var(--button-blue);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.3s;
+}
+
+.dates-list li button:hover {
+    background-color: var(--button-blue-hover);
+}
+
+.roster-details-panel {
+    padding: 20px;
+}
+
+.roster-details-title {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+}
+
+.daily-roster-content .roster-entry {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-left: 5px solid var(--primary-color);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+.roster-artist-name {
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+.roster-time, .roster-program {
+    font-size: 1.1rem;
+    margin: 5px 0;
+}
+
+/* Admin Panel */
+>>>>>>> 25a61095fb424d1c2c19148115540178a393d378
 .admin-panel-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+<<<<<<< HEAD
     background-color: var(--modal-overlay); /* Dark overlay */
     display: flex;
     justify-content: center;
@@ -353,12 +498,31 @@ body {
     max-height: 90vh; /* Max height for scrolling content */
     overflow-y: auto; /* Enable scrolling within the panel content */
     text-align: center; /* Center text inside content */
+=======
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.admin-panel-content {
+    background: var(--panel-background);
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+>>>>>>> 25a61095fb424d1c2c19148115540178a393d378
 }
 
 .close-btn {
     position: absolute;
     top: 15px;
     right: 20px;
+<<<<<<< HEAD
     background: none;
     border: none;
     font-size: 2.5em; /* Larger for easy clicking */
@@ -429,11 +593,47 @@ body {
     border-color: var(--dark-purple);
     box-shadow: 0 0 0 3px rgba(142, 36, 170, 0.2);
     outline: none;
+=======
+    font-size: 2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.admin-section-title {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+/* Forms */
+.form-layout {
+    display: grid;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-group input, .form-group select {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+>>>>>>> 25a61095fb424d1c2c19148115540178a393d378
 }
 
 .input-with-button {
     display: flex;
     gap: 10px;
+<<<<<<< HEAD
     align-items: center; /* Vertically align select and button */
 }
 
@@ -606,12 +806,86 @@ body {
     justify-content: space-between;
     align-items: center;
     color: var(--dark-text);
+=======
+}
+
+.input-with-button select {
+    flex-grow: 1;
+}
+
+.submit-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: var(--button-hover-dark);
+}
+
+.green-btn {
+    background-color: var(--button-green);
+}
+
+.green-btn:hover {
+    background-color: var(--button-green-hover);
+}
+
+/* Admin Tabs */
+.admin-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active-tab {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.admin-section {
+    display: none;
+}
+
+.admin-section.active-section {
+    display: block;
+}
+
+/* Lists */
+.existing-list {
+    list-style: none;
+    padding: 0;
+}
+
+.existing-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+>>>>>>> 25a61095fb424d1c2c19148115540178a393d378
 }
 
 .existing-list li:last-child {
     border-bottom: none;
 }
 
+<<<<<<< HEAD
 .existing-list li span {
     flex-grow: 1; /* Allow text to take space */
 }
@@ -702,4 +976,36 @@ body {
         width: 100%; /* Full width when stacked */
         margin-top: 5px; /* Space between select and button */
     }
+=======
+.delete-btn {
+    background-color: var(--button-red);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background-color: var(--button-red-hover);
+}
+
+/* Footer */
+.main-footer {
+    background-color: #333;
+    color: var(--light-text-color);
+    text-align: center;
+    padding: 1.5rem 0;
+    margin-top: auto;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none;
+}
+
+.form-message {
+    margin-top: 10px;
+    font-weight: bold;
+>>>>>>> 25a61095fb424d1c2c19148115540178a393d378
 }
