@@ -72,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const rawData = await response.json();
             console.log('Raw Roster Data from API:', rawData); // Log raw data for debugging
 
-            // Store the raw array of all roster entries
             allRosterData = rawData;
 
             // Set date input to today's date in YYYY-MM-DD format and display initial roster
@@ -80,11 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
-            const todayString = `${yyyy}-${mm}-${dd}`; // Format for input type="date"
+            const todayString = `${yyyy}-${mm}-${dd}`;
 
             if (dateInput) {
-                dateInput.value = todayString; // Set the date picker to today's date
-                // Trigger display for today's roster after data is loaded
+                dateInput.value = todayString;
                 displayRoster(todayString);
             }
 
@@ -109,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Artists data loaded:', allArtistsData);
             displayArtists(allArtistsData);
             populateArtistDropdown(allArtistsData);
-            displayExistingArtists(allArtistsData); // Populate existing artists list in admin
+            displayExistingArtists(allArtistsData);
         } catch (error) {
             console.error('Could not fetch artist data:', error);
             if (artistsContainer) {
@@ -128,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allProgrammesData = data;
             console.log('Programmes data loaded:', allProgrammesData);
             populateProgrammeDropdown(allProgrammesData);
-            displayExistingProgrammes(allProgrammesData); // Populate existing programmes list in admin
+            displayExistingProgrammes(allProgrammesData);
         } catch (error) {
             console.error('Could not fetch programme data:', error);
         }
@@ -150,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 class="card-subtitle">Department Head</h3>
                 <div class="artist-card department-head-card">
                     <div class="artist-info">
-                        <img src="${photoSrc}" alt="${departmentHead['Artist Name']}" class="artist-photo">
+                        <img src="${photoSrc}" alt="${departmentHead['Artist Name']}" class="artist-photo" onerror="this.onerror=null;this.src='images/artist-placeholder.png';">
                         <div>
                             <p class="artist-name">${departmentHead['Artist Name']}</p>
                             <p class="artist-description">${departmentHead.Specialty}</p>
@@ -175,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 artistCard.classList.add('artist-card');
                 const photoSrc = artist.PhotoURL || `./Images/${artist['Artist Name'].replace(/\s/g, '-')}.jpg`;
                 artistCard.innerHTML = `
-                    <img src="${photoSrc}" alt="${artist['Artist Name']}" class="artist-photo">
+                    <img src="${photoSrc}" alt="${artist['Artist Name']}" class="artist-photo" onerror="this.onerror=null;this.src='images/artist-placeholder.png';">
                     <h4>${artist['Artist Name']}</h4>
                     <p>${artist.Specialty}</p>
                 `;
@@ -185,35 +183,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Robust programme thumbnail logic: tries .jpg, then .png, then falls back to placeholder
+    const getProgrammeThumbImgHtml = (programmeName) => {
+        const base = `./Images/${programmeName.replace(/\s/g, '-')}`;
+        const jpg = `${base}.jpg`;
+        const png = `${base}.png`;
+        // Tries .jpg, then .png, then falls back to placeholder
+        return `<img src="${jpg}" class="programme-thumb" alt="${programmeName}"
+            onerror="this.onerror=null;
+                     if(this.src.indexOf('.jpg')!==-1){this.src='${png}';}
+                     else{this.src='images/programme-placeholder.png';}">`;
+    };
+
     const displayRoster = (selectedDateString) => {
         if (!dailyRosterContent) return;
 
-        dailyRosterContent.innerHTML = ''; // Clear previous roster
-        if (noRosterMessage) noRosterMessage.classList.add('hidden'); // Hide "No roster" message initially
+        dailyRosterContent.innerHTML = '';
+        if (noRosterMessage) noRosterMessage.classList.add('hidden');
 
-        // Format the selected date for display in the header
-        const displayDate = new Date(selectedDateString + 'T00:00:00'); // Add T00:00:00 to avoid timezone issues
+        const displayDate = new Date(selectedDateString + 'T00:00:00');
         const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
         const readableDate = displayDate.toLocaleDateString('en-US', options);
         if (selectedDateHeader) selectedDateHeader.textContent = `Roster for ${readableDate}:`;
 
-        // Filter allRosterData to get entries for the selected date
         const entriesForSelectedDate = allRosterData.filter(entry => {
-            let entryDate = entry.Date; // Get the date string from the roster entry
-
-            // IMPORTANT: Convert entryDate from DD.MM.YYYY (from sheet) to YYYY-MM-DD for comparison
-            // This is crucial for matching with selectedDateString from date input
+            let entryDate = entry.Date;
             if (typeof entryDate === 'string' && entryDate.includes('.')) {
-                const parts = entryDate.split('.'); // e.g., "10.07.2025" -> ["10", "07", "2025"]
-                entryDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // Convert to "2025-07-10"
+                const parts = entryDate.split('.');
+                entryDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
             }
-            // If your Apps Script sends dates as JavaScript Date objects or YYYY-MM-DD strings directly,
-            // adjust this conversion logic accordingly.
-
             return entryDate === selectedDateString;
         });
 
-        console.log('Filtered Roster Data for', selectedDateString, ':', entriesForSelectedDate); // Log filtered data
+        console.log('Filtered Roster Data for', selectedDateString, ':', entriesForSelectedDate);
 
         if (entriesForSelectedDate && entriesForSelectedDate.length > 0) {
             const groupedByProgramme = entriesForSelectedDate.reduce((acc, entry) => {
@@ -230,14 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const programmeElement = document.createElement('div');
                 programmeElement.classList.add('roster-programme-group');
 
-                const programmeData = allProgrammesData.find(p => p['Program Name'] === programmeName);
-                const programmeThumbSrc = programmeData && programmeData.PhotoURL
-                                            ? programmeData.PhotoURL
-                                            : 'images/programme-placeholder.png';
-
                 const programmeNameElement = document.createElement('h4');
                 programmeNameElement.classList.add('roster-program-name');
-                programmeNameElement.innerHTML = `<img src="${programmeThumbSrc}" class="programme-thumb" alt="${programmeName}"> ${programmeName}`;
+                programmeNameElement.innerHTML = `${getProgrammeThumbImgHtml(programmeName)} ${programmeName}`;
                 programmeElement.appendChild(programmeNameElement);
 
                 const ul = document.createElement('ul');
@@ -250,9 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (dailyRosterContent) dailyRosterContent.appendChild(programmeElement);
             }
         } else {
-            // No entries found for the selected date
-            dailyRosterContent.innerHTML = ''; // Clear any leftover content
-            if (noRosterMessage) noRosterMessage.classList.remove('hidden'); // Show "No roster" message
+            dailyRosterContent.innerHTML = '';
+            if (noRosterMessage) noRosterMessage.classList.remove('hidden');
             if (selectedDateHeader) selectedDateHeader.textContent = `No roster entries for ${readableDate}.`;
         }
     };
@@ -360,15 +356,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleAdminTabClick = (event) => {
         const targetButton = event.target.closest('.tab-button');
         if (targetButton) {
-            console.log('Tab button clicked:', targetButton.dataset.tab);
-
             document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active-tab'));
             document.querySelectorAll('.admin-section').forEach(section => section.classList.add('hidden'));
-
             targetButton.classList.add('active-tab');
             const targetTabId = targetButton.dataset.tab;
-            console.log('Switching to tab section:', targetTabId);
-
             const targetSection = document.getElementById(targetTabId);
             if (targetSection) {
                 targetSection.classList.remove('hidden');
@@ -380,10 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dateInput) {
         dateInput.addEventListener('change', (event) => {
-            const selectedDate = event.target.value; // This will give YYYY-MM-DD from input type="date"
-            console.log('Date input changed. Selected date:', selectedDate); // Debugging log
+            const selectedDate = event.target.value;
             if (selectedDate) {
-                displayRoster(selectedDate); // Now this will filter from allRosterData
+                displayRoster(selectedDate);
             } else {
                 dailyRosterContent.innerHTML = '';
                 noRosterMessage.classList.remove('hidden');
@@ -467,11 +457,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Form Submissions (placeholders for API calls) ---
     if (rosterForm) {
-        rosterForm.addEventListener('submit', async (event) => { // Added async keyword
+        rosterForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const selectedArtist = rosterArtistSelect.value;
             const selectedProgramme = rosterProgrammeSelect.value;
-            const rosterDate = rosterDateInputAdmin.value; // Get the date from the admin form
+            const rosterDate = rosterDateInputAdmin.value;
             const timeSlot = rosterTimeSlotInput.value;
 
             if (!selectedArtist) {
@@ -491,18 +481,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            console.log('Submitting roster entry:', {
-                date: rosterDate,
-                artist: selectedArtist,
-                timeSlot: timeSlot,
-                programme: selectedProgramme
-            });
-
-            // Prepare data for Google Apps Script POST request
             const formData = new FormData();
             formData.append('sheet', 'Roster');
-            formData.append('action', 'add'); // Or 'update', 'delete'
-            formData.append('Date', rosterDate); // Use the YYYY-MM-DD format
+            formData.append('action', 'add');
+            formData.append('Date', rosterDate);
             formData.append('Artist Name', selectedArtist);
             formData.append('Time Slot', timeSlot);
             formData.append('Program', selectedProgramme);
@@ -517,7 +499,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.status === 'success') {
                     showFormMessage(rosterFormMessage, 'Roster entry added successfully!', false);
                     rosterForm.reset();
-                    // Re-fetch all roster data to update the main display
                     await fetchRosterData();
                 } else {
                     showFormMessage(rosterFormMessage, `Error: ${result.message}`, true);
@@ -531,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     if (addArtistForm) {
-        addArtistForm.addEventListener('submit', async (event) => { // Added async keyword
+        addArtistForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const artistName = newArtistNameInput.value;
             const artistSpecialty = newArtistSpecialtyInput.value;
@@ -542,13 +523,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            console.log('Submitting new artist:', {
-                name: artistName,
-                specialty: artistSpecialty,
-                photoURL: artistPhotoURL
-            });
-
-            // Prepare data for Google Apps Script POST request
             const formData = new FormData();
             formData.append('sheet', 'Artists');
             formData.append('action', 'add');
@@ -566,7 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.status === 'success') {
                     showFormMessage(addArtistFormMessage, 'Artist added successfully!', false);
                     addArtistForm.reset();
-                    await fetchArtistsData(); // Re-fetch artists to update dropdowns and lists
+                    await fetchArtistsData();
                 } else {
                     showFormMessage(addArtistFormMessage, `Error: ${result.message}`, true);
                 }
@@ -579,24 +553,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     if (addProgrammeForm) {
-        addProgrammeForm.addEventListener('submit', async (event) => { // Added async keyword
+        addProgrammeForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const programmeName = newProgrammeNameInput.value;
             const programmeDescription = newProgrammeDescriptionInput.value;
-            const programmePhotoURL = newProgrammePhotoURLInput.value; // Assuming it's a URL or text input for now
+            const programmePhotoURL = newProgrammePhotoURLInput.value;
 
             if (!programmeName) {
                 showFormMessage(addProgrammeFormMessage, 'Programme Name is required.', true);
                 return;
             }
 
-            console.log('Submitting new programme:', {
-                name: programmeName,
-                description: programmeDescription,
-                photoURL: programmePhotoURL
-            });
-
-            // Prepare data for Google Apps Script POST request
             const formData = new FormData();
             formData.append('sheet', 'Programmes');
             formData.append('action', 'add');
@@ -614,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.status === 'success') {
                     showFormMessage(addProgrammeFormMessage, 'Programme added successfully!', false);
                     addProgrammeForm.reset();
-                    await fetchProgrammesData(); // Re-fetch programmes to update dropdowns and lists
+                    await fetchProgrammesData();
                 } else {
                     showFormMessage(addProgrammeFormMessage, `Error: ${result.message}`, true);
                 }
