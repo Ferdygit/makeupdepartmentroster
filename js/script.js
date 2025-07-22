@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addProgrammeForm = document.getElementById('addProgrammeForm');
     const newProgrammeNameInput = document.getElementById('newProgrammeName');
     const newProgrammeDescriptionInput = document.getElementById('newProgrammeDescription');
-    const newProgrammePhotoInput = document.getElementById('newProgrammePhoto');
+    const newProgrammePhotoURLInput = document.getElementById('newProgrammePhotoURL');
     const addProgrammeFormMessage = document.getElementById('addProgrammeFormMessage');
     const existingProgrammesList = document.getElementById('existingProgrammesList');
 
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             const programmeName = newProgrammeNameInput.value;
             const programmeDescription = newProgrammeDescriptionInput.value;
-            const programmePhotoURL = newProgrammePhotoInput.value; // Assuming it's a URL or text input for now
+            const programmePhotoURL = newProgrammePhotoURLInput.value; // Assuming it's a URL or text input for now
 
             if (!programmeName) {
                 showFormMessage(addProgrammeFormMessage, 'Programme Name is required.', true);
