@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Main UI Elements ---
-    const dateInput = document.getElementById('rosterDateInput');
+    const dateInput = document.getElementById('rosterDate');
     const dailyRosterContent = document.getElementById('dailyRosterContent');
     const selectedDateHeader = document.getElementById('selectedDateHeader');
     const noRosterMessage = document.getElementById('noRosterMessage');
