@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addNewProgrammeBtn = document.getElementById('addNewProgrammeBtn');
 
     // IMPORTANT: REPLACE WITH YOUR DEPLOYED APPS SCRIPT WEB APP URL
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyKQNTAoENa0R8bFFB1fpOzK6qTb7Igg2Qx4DOI5bgM2PsEGUsoLzUwUPHTv9s6fTP1/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwBu-Y72HvpM8HjFiM-pTuDJyyLCyGdqa2yqQe6xP6iQAX-MM8MSRpyACPMV6Az1N6W/exec';
 
     // Global data stores
     let allRosterData = []; // Changed to array to store all fetched roster entries
