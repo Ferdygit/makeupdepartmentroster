@@ -1,33 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Main UI Elements ---
-    const dateInput = document.getElementById('rosterDateInput'); // Corrected ID from 'rosterDate' to 'rosterDateInput'
+    const dateInput = document.getElementById('rosterDateInput');
     const dailyRosterContent = document.getElementById('dailyRosterContent');
     const selectedDateHeader = document.getElementById('selectedDateHeader');
     const noRosterMessage = document.getElementById('noRosterMessage');
     const artistsContainer = document.getElementById('artistsContainer');
 
     // --- Admin Panel Elements ---
-    const adminLoginBtn = document.getElementById('adminLoginBtn'); // Main header button (e.g., in your nav)
-    const adminPanel = document.getElementById('adminPanel'); // The entire admin panel modal/container
-    const closeAdminPanelBtn = document.getElementById('closeAdminPanelBtn'); // Close button inside the admin panel
-    
-    // Login form elements (these should be *inside* adminPanel and potentially nested further)
-    const adminLoginFormContainer = document.getElementById('adminLoginFormContainer'); // Assuming a container for the login form
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const adminPanel = document.getElementById('adminPanel');
+    const closeAdminPanelBtn = document.getElementById('closeAdminPanelBtn');
+
+    // Login form elements
+    const adminLoginFormContainer = document.getElementById('adminLoginFormContainer');
     const adminLoginForm = document.getElementById('adminLoginForm');
     const adminUsernameInput = document.getElementById('adminUsername');
     const adminPasswordInput = document.getElementById('adminPassword');
     const loginButton = document.getElementById('loginButton');
     const loginMessage = document.getElementById('loginMessage');
 
-    // Admin features container (visible after login, within adminPanel)
-    const adminFeatures = document.getElementById('adminFeatures'); 
+    // Admin features container
+    const adminFeatures = document.getElementById('adminFeatures');
     const logoutButton = document.getElementById('logoutButton');
 
     // Admin tab navigation
-    const adminTabs = document.querySelector('.admin-tabs'); 
+    const adminTabs = document.querySelector('.admin-tabs');
 
-    // Admin forms and their messages (elements within adminFeatures)
-    const rosterDateInputAdmin = document.getElementById('rosterDateInput'); // Admin Roster form date input
+    // Admin forms and their messages
+    const rosterDateInputAdmin = document.getElementById('rosterDateInput'); // Admin Roster form date input, same as main dateInput
     const rosterArtistSelect = document.getElementById('rosterArtist');
     const rosterTimeSlotInput = document.getElementById('rosterTimeSlot');
     const rosterProgrammeSelect = document.getElementById('rosterProgramme');
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://script.google.com/macros/s/AKfycbyKQNTAoENa0R8bFFB1fpOzK6qTb7Igg2Qx4DOI5bgM2PsEGUsoLzUwUPHTv9s6fTP1/exec';
 
     // Global data stores
-    let allRosterData = {};
+    let allRosterData = []; // Changed to array to store all fetched roster entries
     let allArtistsData = [];
     let allProgrammesData = [];
 
@@ -64,35 +64,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchRosterData = async () => {
         try {
+            // Fetch ALL roster data from the Apps Script
             const response = await fetch(`${API_URL}?sheet=Roster`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const rawData = await response.json();
-            console.log('Raw Roster Data:', rawData);
+            console.log('Raw Roster Data from API:', rawData); // Log raw data for debugging
 
-            allRosterData = {};
-            rawData.forEach(entry => {
-                const standardDate = entry.Date; 
-                if (!allRosterData[standardDate]) {
-                    allRosterData[standardDate] = [];
-                }
-                allRosterData[standardDate].push(entry);
-            });
+            // Store the raw array of all roster entries
+            allRosterData = rawData;
 
-            console.log('Processed Roster Data:', allRosterData);
-
-            // Set date input to today's date in YYYY-MM-DD format
+            // Set date input to today's date in YYYY-MM-DD format and display initial roster
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
-            const todayString = `${yyyy}-${mm}-${dd}`;
+            const todayString = `${yyyy}-${mm}-${dd}`; // Format for input type="date"
 
-            if (dateInput) { // Ensure dateInput exists before setting value
-                dateInput.value = todayString;
+            if (dateInput) {
+                dateInput.value = todayString; // Set the date picker to today's date
+                // Trigger display for today's roster after data is loaded
+                displayRoster(todayString);
             }
-            displayRoster(todayString);
 
         } catch (error) {
             console.error('Could not fetch the roster data:', error);
@@ -145,13 +139,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayArtists = (artists) => {
         if (!artistsContainer) return;
 
-        artistsContainer.innerHTML = `<h2 class="section-title">Our Makeup Artists</h2>`; 
+        artistsContainer.innerHTML = `<h2 class="section-title">Our Makeup Artists</h2>`;
 
         const departmentHead = artists.find(artist => artist.Specialty === 'Department Head');
         if (departmentHead) {
             const headGroup = document.createElement('div');
             headGroup.classList.add('artist-group', 'department-head-group');
-            // Using artist.PhotoURL if available, otherwise fallback to local path
             const photoSrc = departmentHead.PhotoURL || `./Images/${departmentHead['Artist Name'].replace(/\s/g, '-')}.jpg`;
             headGroup.innerHTML = `
                 <h3 class="card-subtitle">Department Head</h3>
@@ -192,14 +185,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const displayRoster = (date) => { 
-        const entries = allRosterData[date]; 
-        if (dailyRosterContent) dailyRosterContent.innerHTML = '';
-        if (noRosterMessage) noRosterMessage.classList.add('hidden');
-        if (selectedDateHeader) selectedDateHeader.textContent = `Roster for ${new Date(date).toDateString()}:`; 
+    const displayRoster = (selectedDateString) => {
+        if (!dailyRosterContent) return;
 
-        if (entries && entries.length > 0) {
-            const groupedByProgramme = entries.reduce((acc, entry) => {
+        dailyRosterContent.innerHTML = ''; // Clear previous roster
+        if (noRosterMessage) noRosterMessage.classList.add('hidden'); // Hide "No roster" message initially
+
+        // Format the selected date for display in the header
+        const displayDate = new Date(selectedDateString + 'T00:00:00'); // Add T00:00:00 to avoid timezone issues
+        const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+        const readableDate = displayDate.toLocaleDateString('en-US', options);
+        if (selectedDateHeader) selectedDateHeader.textContent = `Roster for ${readableDate}:`;
+
+        // Filter allRosterData to get entries for the selected date
+        const entriesForSelectedDate = allRosterData.filter(entry => {
+            let entryDate = entry.Date; // Get the date string from the roster entry
+
+            // IMPORTANT: Convert entryDate from DD.MM.YYYY (from sheet) to YYYY-MM-DD for comparison
+            // This is crucial for matching with selectedDateString from date input
+            if (typeof entryDate === 'string' && entryDate.includes('.')) {
+                const parts = entryDate.split('.'); // e.g., "10.07.2025" -> ["10", "07", "2025"]
+                entryDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // Convert to "2025-07-10"
+            }
+            // If your Apps Script sends dates as JavaScript Date objects or YYYY-MM-DD strings directly,
+            // adjust this conversion logic accordingly.
+
+            return entryDate === selectedDateString;
+        });
+
+        console.log('Filtered Roster Data for', selectedDateString, ':', entriesForSelectedDate); // Log filtered data
+
+        if (entriesForSelectedDate && entriesForSelectedDate.length > 0) {
+            const groupedByProgramme = entriesForSelectedDate.reduce((acc, entry) => {
                 const programmeName = entry['Program'] || 'N/A';
                 if (!acc[programmeName]) {
                     acc[programmeName] = [];
@@ -214,9 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 programmeElement.classList.add('roster-programme-group');
 
                 const programmeData = allProgrammesData.find(p => p['Program Name'] === programmeName);
-                const programmeThumbSrc = programmeData && programmeData.PhotoURL 
-                                          ? programmeData.PhotoURL 
-                                          : 'images/programme-placeholder.png'; // Fallback
+                const programmeThumbSrc = programmeData && programmeData.PhotoURL
+                                            ? programmeData.PhotoURL
+                                            : 'images/programme-placeholder.png';
 
                 const programmeNameElement = document.createElement('h4');
                 programmeNameElement.classList.add('roster-program-name');
@@ -233,16 +250,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (dailyRosterContent) dailyRosterContent.appendChild(programmeElement);
             }
         } else {
-            if (dailyRosterContent) dailyRosterContent.innerHTML = '';
-            if (noRosterMessage) noRosterMessage.classList.remove('hidden');
-            if (selectedDateHeader) selectedDateHeader.textContent = `No roster entries for ${new Date(date).toDateString()}.`;
+            // No entries found for the selected date
+            dailyRosterContent.innerHTML = ''; // Clear any leftover content
+            if (noRosterMessage) noRosterMessage.classList.remove('hidden'); // Show "No roster" message
+            if (selectedDateHeader) selectedDateHeader.textContent = `No roster entries for ${readableDate}.`;
         }
     };
 
     // --- Admin Panel Logic ---
 
     const showFormMessage = (messageElement, message, isError = false) => {
-        if (!messageElement) return; // Add check for element
+        if (!messageElement) return;
         messageElement.textContent = message;
         messageElement.style.color = isError ? 'red' : 'green';
         setTimeout(() => {
@@ -314,50 +332,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showAdminPanel = () => {
         if (!adminPanel || !adminLoginFormContainer || !adminFeatures || !loginMessage || !adminUsernameInput || !adminPasswordInput) return;
-        adminPanel.classList.remove('hidden'); // Show the main admin panel modal
-        adminLoginFormContainer.classList.remove('hidden'); // Show login form
-        adminFeatures.classList.add('hidden'); // Hide features
-        loginMessage.textContent = ''; // Clear login message
-        adminUsernameInput.value = ''; // Clear inputs
+        adminPanel.classList.remove('hidden');
+        adminLoginFormContainer.classList.remove('hidden');
+        adminFeatures.classList.add('hidden');
+        loginMessage.textContent = '';
+        adminUsernameInput.value = '';
         adminPasswordInput.value = '';
     };
 
     const hideAdminPanel = () => {
         if (!adminPanel || !adminLoginFormContainer || !adminFeatures || !loginMessage || !adminUsernameInput || !adminPasswordInput) return;
-        adminPanel.classList.add('hidden'); // Hide the main admin panel modal
-        loginMessage.textContent = ''; 
-        adminUsernameInput.value = ''; 
+        adminPanel.classList.add('hidden');
+        loginMessage.textContent = '';
+        adminUsernameInput.value = '';
         adminPasswordInput.value = '';
-        // When hiding the admin panel, reset to login state for next open
-        adminLoginFormContainer.classList.remove('hidden'); 
-        adminFeatures.classList.add('hidden'); 
-        // Reset active tab to Roster when closing/logging out
+        adminLoginFormContainer.classList.remove('hidden');
+        adminFeatures.classList.add('hidden');
         document.querySelectorAll('.admin-tabs button').forEach(button => button.classList.remove('active-tab'));
         document.querySelectorAll('.admin-section').forEach(section => section.classList.add('hidden'));
-        
-        // Explicitly set 'Update Roster' as the default active tab and section
+
         const updateRosterTab = document.querySelector('.admin-tabs button[data-tab="updateRoster"]');
         const updateRosterSection = document.getElementById('updateRoster');
         if (updateRosterTab) updateRosterTab.classList.add('active-tab');
-        if (updateRosterSection) updateRosterSection.classList.remove('hidden'); // Use remove('hidden') here
+        if (updateRosterSection) updateRosterSection.classList.remove('hidden');
     };
 
     const handleAdminTabClick = (event) => {
-        const targetButton = event.target.closest('.tab-button'); // Use closest for better click target detection
+        const targetButton = event.target.closest('.tab-button');
         if (targetButton) {
             console.log('Tab button clicked:', targetButton.dataset.tab);
-            
-            // Remove active class from all buttons
+
             document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active-tab'));
-            // Hide all admin sections
             document.querySelectorAll('.admin-section').forEach(section => section.classList.add('hidden'));
 
-            // Add active class to clicked button
             targetButton.classList.add('active-tab');
             const targetTabId = targetButton.dataset.tab;
             console.log('Switching to tab section:', targetTabId);
-            
-            // Show the corresponding section
+
             const targetSection = document.getElementById(targetTabId);
             if (targetSection) {
                 targetSection.classList.remove('hidden');
@@ -369,9 +380,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dateInput) {
         dateInput.addEventListener('change', (event) => {
-            const selectedDate = event.target.value; 
+            const selectedDate = event.target.value; // This will give YYYY-MM-DD from input type="date"
+            console.log('Date input changed. Selected date:', selectedDate); // Debugging log
             if (selectedDate) {
-                displayRoster(selectedDate);
+                displayRoster(selectedDate); // Now this will filter from allRosterData
             } else {
                 dailyRosterContent.innerHTML = '';
                 noRosterMessage.classList.remove('hidden');
@@ -386,8 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
         adminLoginBtn.addEventListener('click', showAdminPanel);
     }
 
-    // Close button inside admin panel
-    if (closeAdminPanelBtn) { // Changed to closeAdminPanelBtn
+    if (closeAdminPanelBtn) {
         closeAdminPanelBtn.addEventListener('click', hideAdminPanel);
     } else {
         console.error("Close button element with ID 'closeAdminPanelBtn' not found.");
@@ -398,25 +409,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = adminUsernameInput.value;
             const password = adminPasswordInput.value;
 
-            if (username === 'admin' && password === 'password123') { 
+            if (username === 'admin' && password === 'password123') {
                 showFormMessage(loginMessage, 'Login successful!', false);
-                adminLoginFormContainer.classList.add('hidden'); // Hide login form container
-                adminFeatures.classList.remove('hidden'); // Show admin features
+                adminLoginFormContainer.classList.add('hidden');
+                adminFeatures.classList.remove('hidden');
 
-                // Fetch data for dropdowns and lists when admin logs in
                 fetchProgrammesData();
-                fetchArtistsData(); // Re-fetch artists to ensure dropdown is updated
+                fetchArtistsData();
 
-                // Set the current roster date input in admin panel to today's date
                 const today = new Date();
                 const yyyy = today.getFullYear();
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
                 const dd = String(today.getDate()).padStart(2, '0');
-                if (rosterDateInputAdmin) { // Check before setting value
+                if (rosterDateInputAdmin) {
                     rosterDateInputAdmin.value = `${yyyy}-${mm}-${dd}`;
                 }
-                
-                // Set 'Update Roster' as the default active tab after login
+
                 const updateRosterTab = document.querySelector('.admin-tabs button[data-tab="updateRoster"]');
                 const updateRosterSection = document.getElementById('updateRoster');
                 document.querySelectorAll('.admin-tabs button').forEach(btn => btn.classList.remove('active-tab'));
@@ -443,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addNewArtistBtn.addEventListener('click', () => {
             const manageArtistsTab = document.querySelector('.tab-button[data-tab="manageArtists"]');
             if (manageArtistsTab) {
-                manageArtistsTab.click(); // Simulate a click event on the tab button
+                manageArtistsTab.click();
             }
         });
     }
@@ -452,75 +460,174 @@ document.addEventListener('DOMContentLoaded', () => {
         addNewProgrammeBtn.addEventListener('click', () => {
             const manageProgrammesTab = document.querySelector('.tab-button[data-tab="manageProgrammes"]');
             if (manageProgrammesTab) {
-                manageProgrammesTab.click(); // Simulate a click event on the tab button
+                manageProgrammesTab.click();
             }
         });
     }
 
     // --- Form Submissions (placeholders for API calls) ---
     if (rosterForm) {
-        rosterForm.addEventListener('submit', (event) => {
+        rosterForm.addEventListener('submit', async (event) => { // Added async keyword
             event.preventDefault();
             const selectedArtist = rosterArtistSelect.value;
             const selectedProgramme = rosterProgrammeSelect.value;
+            const rosterDate = rosterDateInputAdmin.value; // Get the date from the admin form
+            const timeSlot = rosterTimeSlotInput.value;
 
-            if (!selectedArtist || selectedArtist === "") { // Check for empty string too
+            if (!selectedArtist) {
                 showFormMessage(rosterFormMessage, 'Please select an Artist.', true);
                 return;
             }
-            if (!selectedProgramme || selectedProgramme === "") { // Check for empty string too
+            if (!selectedProgramme) {
                 showFormMessage(rosterFormMessage, 'Please select a Programme.', true);
+                return;
+            }
+            if (!rosterDate) {
+                showFormMessage(rosterFormMessage, 'Please select a Date.', true);
+                return;
+            }
+            if (!timeSlot) {
+                showFormMessage(rosterFormMessage, 'Please enter a Time Slot.', true);
                 return;
             }
 
             console.log('Submitting roster entry:', {
-                date: rosterDateInputAdmin.value, // Use rosterDateInputAdmin for clarity
+                date: rosterDate,
                 artist: selectedArtist,
-                timeSlot: rosterTimeSlotInput.value,
+                timeSlot: timeSlot,
                 programme: selectedProgramme
             });
 
-            showFormMessage(rosterFormMessage, 'Roster entry added successfully!', false);
-            rosterForm.reset();
-            // In a real app, you'd refetch roster data here: fetchRosterData();
+            // Prepare data for Google Apps Script POST request
+            const formData = new FormData();
+            formData.append('sheet', 'Roster');
+            formData.append('action', 'add'); // Or 'update', 'delete'
+            formData.append('Date', rosterDate); // Use the YYYY-MM-DD format
+            formData.append('Artist Name', selectedArtist);
+            formData.append('Time Slot', timeSlot);
+            formData.append('Program', selectedProgramme);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showFormMessage(rosterFormMessage, 'Roster entry added successfully!', false);
+                    rosterForm.reset();
+                    // Re-fetch all roster data to update the main display
+                    await fetchRosterData();
+                } else {
+                    showFormMessage(rosterFormMessage, `Error: ${result.message}`, true);
+                }
+            } catch (error) {
+                console.error('Error submitting roster entry:', error);
+                showFormMessage(rosterFormMessage, 'Error submitting roster entry. Please try again.', true);
+            }
         });
     }
+
 
     if (addArtistForm) {
-        addArtistForm.addEventListener('submit', (event) => {
+        addArtistForm.addEventListener('submit', async (event) => { // Added async keyword
             event.preventDefault();
+            const artistName = newArtistNameInput.value;
+            const artistSpecialty = newArtistSpecialtyInput.value;
+            const artistPhotoURL = newArtistPhotoURLInput.value;
+
+            if (!artistName || !artistSpecialty) {
+                showFormMessage(addArtistFormMessage, 'Artist Name and Specialty are required.', true);
+                return;
+            }
+
             console.log('Submitting new artist:', {
-                name: newArtistNameInput.value,
-                specialty: newArtistSpecialtyInput.value,
-                photoURL: newArtistPhotoURLInput.value
+                name: artistName,
+                specialty: artistSpecialty,
+                photoURL: artistPhotoURL
             });
 
-            showFormMessage(addArtistFormMessage, 'Artist added successfully!', false);
-            addArtistForm.reset();
-            // In a real app, you'd refetch artists and update dropdowns/lists: fetchArtistsData();
+            // Prepare data for Google Apps Script POST request
+            const formData = new FormData();
+            formData.append('sheet', 'Artists');
+            formData.append('action', 'add');
+            formData.append('Artist Name', artistName);
+            formData.append('Specialty', artistSpecialty);
+            formData.append('PhotoURL', artistPhotoURL);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showFormMessage(addArtistFormMessage, 'Artist added successfully!', false);
+                    addArtistForm.reset();
+                    await fetchArtistsData(); // Re-fetch artists to update dropdowns and lists
+                } else {
+                    showFormMessage(addArtistFormMessage, `Error: ${result.message}`, true);
+                }
+            } catch (error) {
+                console.error('Error adding artist:', error);
+                showFormMessage(addArtistFormMessage, 'Error adding artist. Please try again.', true);
+            }
         });
     }
+
 
     if (addProgrammeForm) {
-        addProgrammeForm.addEventListener('submit', (event) => {
+        addProgrammeForm.addEventListener('submit', async (event) => { // Added async keyword
             event.preventDefault();
-            const photoFile = newProgrammePhotoInput.files[0];
+            const programmeName = newProgrammeNameInput.value;
+            const programmeDescription = newProgrammeDescriptionInput.value;
+            const programmePhotoURL = newProgrammePhotoInput.value; // Assuming it's a URL or text input for now
+
+            if (!programmeName) {
+                showFormMessage(addProgrammeFormMessage, 'Programme Name is required.', true);
+                return;
+            }
 
             console.log('Submitting new programme:', {
-                name: newProgrammeNameInput.value,
-                description: newProgrammeDescriptionInput.value,
-                photo: photoFile ? photoFile.name : 'No photo uploaded'
+                name: programmeName,
+                description: programmeDescription,
+                photoURL: programmePhotoURL
             });
 
-            showFormMessage(addProgrammeFormMessage, 'Programme added successfully!', false);
-            addProgrammeForm.reset();
-            // In a real app, you'd refetch programmes and update dropdowns/lists: fetchProgrammesData();
+            // Prepare data for Google Apps Script POST request
+            const formData = new FormData();
+            formData.append('sheet', 'Programmes');
+            formData.append('action', 'add');
+            formData.append('Program Name', programmeName);
+            formData.append('Description', programmeDescription);
+            formData.append('PhotoURL', programmePhotoURL);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showFormMessage(addProgrammeFormMessage, 'Programme added successfully!', false);
+                    addProgrammeForm.reset();
+                    await fetchProgrammesData(); // Re-fetch programmes to update dropdowns and lists
+                } else {
+                    showFormMessage(addProgrammeFormMessage, `Error: ${result.message}`, true);
+                }
+            } catch (error) {
+                console.error('Error adding programme:', error);
+                showFormMessage(addProgrammeFormMessage, 'Error adding programme. Please try again.', true);
+            }
         });
     }
+
 
     // --- Initial Data Fetches when the page loads ---
     fetchRosterData();
     fetchArtistsData();
     // fetchProgrammesData() is called upon successful admin login.
-    // This ensures these dropdowns/lists are populated only when needed by an authenticated user.
 });
