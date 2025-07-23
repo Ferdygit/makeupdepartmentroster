@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addNewProgrammeBtn = document.getElementById('addNewProgrammeBtn');
 
     // IMPORTANT: REPLACE WITH YOUR DEPLOYED APPS SCRIPT WEB APP URL
+    // This URL should be the one you copied after deploying your Apps Script Web App.
     const API_URL = 'https://script.google.com/macros/s/AKfycbwE7nMOHGS2sfo5YAaZJvEhLAiB_w2Oq6a0j1HX3dtGMmM1ig9FwLshpnFirV5-EdXtuQ/exec';
 
     // Global data stores
@@ -69,10 +70,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const rawData = await response.json();
-            console.log('Raw Roster Data from API:', rawData); // Log raw data for debugging
+            const apiResponse = await response.json(); // Get the full API response object
+            console.log('Raw Roster Data from API:', apiResponse); // Log raw data for debugging
 
-            allRosterData = rawData;
+            // --- CRITICAL FIX START ---
+            // Check if API response indicates success and contains data array
+            if (apiResponse.status === 'success' && Array.isArray(apiResponse.data)) {
+                allRosterData = apiResponse.data; // Assign only the 'data' array
+            } else {
+                // Handle cases where API returns error status or data is not an array
+                throw new Error(`API returned an error or invalid data structure: ${apiResponse.message || 'Unknown error'}`);
+            }
+            // --- CRITICAL FIX END ---
 
             // Set date input to today's date in YYYY-MM-DD format and display initial roster
             const today = new Date();
@@ -91,8 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dailyRosterContent) {
                 dailyRosterContent.innerHTML = '<p>Error loading roster data. Please try again later.</p>';
                 selectedDateHeader.textContent = 'Error loading roster.';
-                noRosterMessage.classList.add('hidden');
+                noRosterMessage.classList.remove('hidden'); // Ensure message is visible on error
             }
+            allRosterData = []; // Ensure it's an empty array on error to prevent further TypeErrors
         }
     };
 
@@ -102,8 +112,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
-            allArtistsData = data;
+            const apiResponse = await response.json(); // Get the full API response object
+
+            // --- CRITICAL FIX START ---
+            if (apiResponse.status === 'success' && Array.isArray(apiResponse.data)) {
+                allArtistsData = apiResponse.data; // Assign only the 'data' array
+            } else {
+                throw new Error(`API returned an error or invalid data structure: ${apiResponse.message || 'Unknown error'}`);
+            }
+            // --- CRITICAL FIX END ---
+
             console.log('Artists data loaded:', allArtistsData);
             displayArtists(allArtistsData);
             populateArtistDropdown(allArtistsData);
@@ -113,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (artistsContainer) {
                 artistsContainer.innerHTML = `<h2 class="section-title">Our Makeup Artists</h2><p>Error loading artist data. Please try again later.</p>`;
             }
+            allArtistsData = []; // Ensure it's an empty array on error
         }
     };
 
@@ -122,13 +141,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
-            allProgrammesData = data;
+            const apiResponse = await response.json(); // Get the full API response object
+
+            // --- CRITICAL FIX START ---
+            if (apiResponse.status === 'success' && Array.isArray(apiResponse.data)) {
+                allProgrammesData = apiResponse.data; // Assign only the 'data' array
+            } else {
+                throw new Error(`API returned an error or invalid data structure: ${apiResponse.message || 'Unknown error'}`);
+            }
+            // --- CRITICAL FIX END ---
+
             console.log('Programmes data loaded:', allProgrammesData);
             populateProgrammeDropdown(allProgrammesData);
             displayExistingProgrammes(allProgrammesData);
         } catch (error) {
             console.error('Could not fetch programme data:', error);
+            allProgrammesData = []; // Ensure it's an empty array on error
         }
     };
 
@@ -139,10 +167,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         artistsContainer.innerHTML = `<h2 class="section-title">Our Makeup Artists</h2>`;
 
+        // Ensure 'artists' is an array before trying to use .find or .filter
+        if (!Array.isArray(artists)) {
+            console.error("displayArtists received non-array data:", artists);
+            artistsContainer.innerHTML += `<p>Error: Artist data format is incorrect.</p>`;
+            return;
+        }
+
         const departmentHead = artists.find(artist => artist.Specialty === 'Department Head');
         if (departmentHead) {
             const headGroup = document.createElement('div');
             headGroup.classList.add('artist-group', 'department-head-group');
+            // Use PhotoURL from data first, then fallback to local image path
             const photoSrc = departmentHead.PhotoURL || `./Images/${departmentHead['Artist Name'].replace(/\s/g, '-')}.jpg`;
             headGroup.innerHTML = `
                 <h3 class="card-subtitle">Department Head</h3>
@@ -206,8 +242,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const readableDate = displayDate.toLocaleDateString('en-US', options);
         if (selectedDateHeader) selectedDateHeader.textContent = `Roster for ${readableDate}:`;
 
+        // Ensure allRosterData is an array before trying to use .filter
+        if (!Array.isArray(allRosterData)) {
+            console.error("displayRoster received non-array data for allRosterData:", allRosterData);
+            dailyRosterContent.innerHTML = '<p>Error: Roster data format is incorrect.</p>';
+            noRosterMessage.classList.remove('hidden');
+            return;
+        }
+
         const entriesForSelectedDate = allRosterData.filter(entry => {
             let entryDate = entry.Date;
+            // Handle date format from sheet (DD.MM.YYYY) and convert to YYYY-MM-DD for comparison
             if (typeof entryDate === 'string' && entryDate.includes('.')) {
                 const parts = entryDate.split('.');
                 entryDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -219,7 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (entriesForSelectedDate && entriesForSelectedDate.length > 0) {
             const groupedByProgramme = entriesForSelectedDate.reduce((acc, entry) => {
-                const programmeName = entry['Program'] || 'N/A';
+                // Use 'Programme' as the key, as per Apps Script response
+                const programmeName = entry['Programme'] || 'N/A'; 
                 if (!acc[programmeName]) {
                     acc[programmeName] = [];
                 }
@@ -240,7 +286,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ul = document.createElement('ul');
                 programmeEntries.forEach(entry => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<strong>${entry['Time Slot']}:</strong> ${entry['Artist Name']}`;
+                    // Use 'Artist' for the artist name from Apps Script response
+                    li.innerHTML = `<strong>${entry['Time Slot']}:</strong> ${entry['Artist']}`; 
                     ul.appendChild(li);
                 });
                 programmeElement.appendChild(ul);
@@ -267,29 +314,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const populateArtistDropdown = (artists) => {
         if (!rosterArtistSelect) return;
         rosterArtistSelect.innerHTML = '<option value="">Select Artist</option>';
-        artists.forEach(artist => {
-            const option = document.createElement('option');
-            option.value = artist['Artist Name'];
-            option.textContent = artist['Artist Name'];
-            rosterArtistSelect.appendChild(option);
-        });
+        // Ensure 'artists' is an array before iterating
+        if (Array.isArray(artists)) {
+            artists.forEach(artist => {
+                const option = document.createElement('option');
+                option.value = artist['Artist Name'];
+                option.textContent = artist['Artist Name'];
+                rosterArtistSelect.appendChild(option);
+            });
+        }
     };
 
     const populateProgrammeDropdown = (programmes) => {
         if (!rosterProgrammeSelect) return;
         rosterProgrammeSelect.innerHTML = '<option value="">Select Programme</option>';
-        programmes.forEach(prog => {
-            const option = document.createElement('option');
-            option.value = prog['Program Name'];
-            option.textContent = prog['Program Name'];
-            rosterProgrammeSelect.appendChild(option);
-        });
+        // Ensure 'programmes' is an array before iterating
+        if (Array.isArray(programmes)) {
+            programmes.forEach(prog => {
+                const option = document.createElement('option');
+                option.value = prog['Program Name'];
+                option.textContent = prog['Program Name'];
+                rosterProgrammeSelect.appendChild(option);
+            });
+        }
     };
 
     const displayExistingArtists = (artists) => {
         if (!existingArtistsList) return;
         existingArtistsList.innerHTML = '';
-        if (artists.length === 0) {
+        // Ensure 'artists' is an array before iterating
+        if (!Array.isArray(artists) || artists.length === 0) {
             existingArtistsList.innerHTML = '<li>No artists found.</li>';
             return;
         }
@@ -309,7 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayExistingProgrammes = (programmes) => {
         if (!existingProgrammesList) return;
         existingProgrammesList.innerHTML = '';
-        if (programmes.length === 0) {
+        // Ensure 'programmes' is an array before iterating
+        if (!Array.isArray(programmes) || programmes.length === 0) {
             existingProgrammesList.innerHTML = '<li>No programmes found.</li>';
             return;
         }
@@ -487,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('Date', rosterDate);
             formData.append('Artist Name', selectedArtist);
             formData.append('Time Slot', timeSlot);
-            formData.append('Program', selectedProgramme);
+            formData.append('Program', selectedProgramme); // 'Program' is the frontend input name
 
             try {
                 const response = await fetch(API_URL, {
