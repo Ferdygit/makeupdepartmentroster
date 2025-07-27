@@ -3,146 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Derana Makeup Department Roster</title>
-    <link href="css/style.css" rel="stylesheet">
+    <title>TV Derana Makeup Department</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 </head>
 <body>
-
-    <header class="main-header">
-        <div class="container header-content">
-            <h1 class="site-title">TV Derana Makeup Department</h1>
-            <button id="adminLoginBtn" class="admin-login-btn">Admin Login</button>
-        </div>
+    <header>
+        <h1>TV Derana Makeup Department</h1>
+        <button id="adminLoginBtn" onclick="location.href='admin.html'">Admin Login</button>
     </header>
 
-    <main class="container main-content-grid">
-
-        <section class="artists-section panel" id="artistsContainer"> 
-            <h2 class="section-title">Our Makeup Artists</h2>
-        </section>
-
-        <section class="roster-section panel">
-            <h2 class="section-title">Daily Duty Roster</h2>
-            <div class="roster-display-grid">
-                <div id="datesList" class="dates-list-panel">
-                    <h2 class="dates-list-title">Select a Date:</h2>
-                    <input type="date" id="rosterDate" class="date-input">
-                    <ul class="dates-list" id="dateButtonsContainer">
-                    </ul>
+    <main>
+        <section class="daily-duty-roster">
+            <h2>Daily Duty Roster</h2>
+            <div class="roster-controls">
+                <div class="date-picker-container">
+                    <label for="datepicker">Select a Date:</label>
+                    <input type="text" id="datepicker" readonly>
                 </div>
-
-                <div id="rosterDetails" class="roster-details-panel">
-                    <h3 class="roster-details-title" id="selectedDateHeader">Select a date to view the roster.</h3>
-                    <div id="dailyRosterContent" class="daily-roster-content">
+                <div class="roster-display">
+                    <h3>Roster for <span id="selectedDateDisplay"></span>:</h3>
+                    <div id="rosterContent">
+                        <p class="no-roster-message">No roster entries for this date.</p>
                     </div>
-                    <p id="noRosterMessage" class="no-roster-message hidden">No roster entries for this date.</p>
                 </div>
             </div>
+        </section>
+
+        <section class="our-makeup-artists">
+            <h2>Our Makeup Artists</h2>
+            <div class="artist-list">
+                </div>
         </section>
     </main>
 
-    <div id="adminPanel" class="admin-panel-container hidden">
-    <div class="admin-panel-content">
-        <button type="button" class="close-btn" id="closeAdminPanelBtn">&times;</button>
-        
-        <div id="adminLoginFormContainer">
-            <h3 class="admin-section-title">Admin Login</h3>
-            <form id="adminLoginForm" class="form-layout">
-                <div class="form-group">
-                    <label for="adminUsername">Username:</label>
-                    <input type="text" id="adminUsername" required>
-                </div>
-                <div class="form-group">
-                    <label for="adminPassword">Password:</label>
-                    <input type="password" id="adminPassword" required>
-                </div>
-                <button type="button" id="loginButton" class="submit-btn">Login</button>
-                <p id="loginMessage" class="form-message"></p>
-            </form>
-        </div>
-
-        <div id="adminFeatures" class="admin-features-wrapper hidden"> 
-            <div class="admin-tabs">
-                <button class="tab-button active-tab" data-tab="updateRoster">Update Roster</button>
-                <button class="tab-button" data-tab="manageArtists">Manage Artists</button>
-                <button class="tab-button" data-tab="manageProgrammes">Manage Programmes</button>
-            </div>
-
-            <div id="updateRoster" class="admin-section active-section"> 
-                <h3 class="admin-section-title">Update Daily Roster</h3>
-                <form id="rosterForm" class="form-layout">
-                    <div class="form-group">
-                        <label for="rosterDateInput">Date:</label> <input type="date" id="rosterDateInput" name="rosterDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="rosterArtist">Artist:</label>
-                        <div class="input-with-button">
-                            <select id="rosterArtist" name="rosterArtist" required></select>
-                            <button type="button" id="addNewArtistBtn" class="add-new-btn">Add New</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="rosterTimeSlot">Time Slot:</label>
-                        <input type="text" id="rosterTimeSlot" name="rosterTimeSlot" placeholder="e.g., 08.00 AM - 03 PM" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="rosterProgramme">Programme:</label>
-                        <div class="input-with-button">
-                            <select id="rosterProgramme" name="rosterProgramme" required></select>
-                            <button type="button" id="addNewProgrammeBtn" class="add-new-btn">Add New</button>
-                        </div>
-                    </div>
-                    <button type="submit" class="submit-btn">Add Roster Entry</button>
-                    <p id="rosterFormMessage" class="form-message"></p>
-                </form>
-            </div>
-
-            <div id="manageArtists" class="admin-section hidden"> 
-                <h3 class="admin-section-title">Manage Artists</h3>
-                <form id="addArtistForm" class="form-layout section-form">
-                    <h4 class="form-section-title">Add New Artist</h4>
-                    <div class="form-group">
-                        <label for="newArtistName">Name:</label>
-                        <input type="text" id="newArtistName" name="newArtistName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="newArtistSpecialty">Specialty:</label> <input type="text" id="newArtistSpecialty" name="newArtistSpecialty" placeholder="e.g., Senior Makeup Artist" required>
-                    </div>
-                    <button type="submit" class="submit-btn green-btn">Add Artist</button>
-                    <p id="addArtistFormMessage" class="form-message"></p>
-                </form>
-                <h4 class="form-section-title">Existing Artists</h4>
-                <ul id="existingArtistsList" class="existing-list"></ul>
-            </div>
-
-            <div id="manageProgrammes" class="admin-section hidden"> 
-                <h3 class="admin-section-title">Manage Programmes</h3>
-                <form id="addProgrammeForm" class="form-layout section-form">
-                    <h4 class="form-section-title">Add New Programme</h4>
-                    <div class="form-group">
-                        <label for="newProgrammeName">Name:</label>
-                        <input type="text" id="newProgrammeName" name="newProgrammeName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="newProgrammeDescription">Description:</label> <input type="text" id="newProgrammeDescription" name="newProgrammeDescription" placeholder="e.g., Live News Segment" required>
-                    </div>
-                    <button type="submit" class="submit-btn green-btn">Add Programme</button>
-                    <p id="addProgrammeFormMessage" class="form-message"></p>
-                </form>
-                <h4 class="form-section-title">Existing Programmes</h4>
-                <ul id="existingProgrammesList" class="existing-list"></ul>
-            </div>
-            <button id="logoutButton" class="btn btn-secondary logout-button">Logout</button> 
-        </div>
-    </div>
-</div>
-
-    <footer class="main-footer">
-        <div class="container">
-            &copy; 2025 TV Derana Makeup Department. All rights reserved.
-        </div>
+    <footer>
+        <p>&copy; 2025 TV Derana Makeup Department. All rights reserved.</p>
     </footer>
 
-    <script src="js/script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

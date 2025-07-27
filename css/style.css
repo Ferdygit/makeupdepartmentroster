@@ -1,684 +1,411 @@
-/* Basic Reset & Box-sizing */
-*, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-:root {
-    --primary-purple: #6a0572;
-    --dark-purple: #8e24aa;
-    --light-gray-bg: #f4f7f6;
-    --white: #ffffff;
-    --dark-text: #333;
-    --medium-text: #555;
-    --light-text: #666;
-    --border-color: #eee;
-    --hover-gray: #e0e0e0;
-    --success-green: #28a745;
-    --dark-success-green: #218838;
-    --error-red: red;
-    --dark-footer: #2c3e50;
-}
-
 body {
     font-family: 'Arial', sans-serif;
-    background-color: var(--light-gray-bg);
-    color: var(--dark-text);
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
     line-height: 1.6;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* --- Utility Classes --- */
-.hidden {
-    display: none !important;
-}
-
-.form-message {
-    margin-top: 10px;
-    font-size: 0.9em;
-    font-weight: bold;
+header {
+    background-color: #6a1b9a; /* Deep Purple */
+    color: white;
+    padding: 1rem 0;
     text-align: center;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* --- Header --- */
-.main-header {
-    background: linear-gradient(to right, var(--primary-purple), var(--dark-purple));
-    color: var(--white);
-    padding: 20px 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
 }
 
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.site-title {
-    font-size: 2.2em;
-    font-weight: bold;
-}
-
-.admin-login-btn {
-    background-color: var(--white);
-    color: var(--primary-purple);
-    padding: 10px 20px;
+#adminLoginBtn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: #e040fb; /* Light Purple */
+    color: white;
     border: none;
-    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
     cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
 }
 
-.admin-login-btn:hover {
-    background-color: var(--hover-gray);
+#adminLoginBtn:hover {
+    background-color: #c2185b; /* Darker Pink */
 }
 
-/* --- Main Content Layout --- */
-.main-content-grid {
-    padding: 30px 20px;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 30px;
-    flex-grow: 1;
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
 
-.panel {
-    background-color: var(--white);
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+.daily-duty-roster, .our-makeup-artists {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
 }
 
-.section-title {
-    font-size: 2em;
-    font-weight: 600;
-    margin-bottom: 25px;
-    color: var(--primary-purple);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 10px;
+h2 {
+    color: #6a1b9a;
+    border-bottom: 2px solid #e040fb;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
 }
 
-/* --- Artist Section --- */
-.artists-section {}
-
-.artist-group .card-subtitle {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: #444;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 5px;
-}
-
-.department-head-card {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.artist-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 10px;
-}
-
-.artist-photo {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--primary-purple);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.artist-name {
-    font-size: 1.3em;
-    font-weight: 500;
-    color: var(--dark-text);
-}
-
-.artist-description {
-    font-size: 0.9em;
-    color: var(--light-text);
-}
-
-.talented-team-list {
+.roster-controls {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: center;
 }
 
-.talented-team-list .artist-card {
-    background-color: var(--white);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+.date-picker-container {
+    flex: 1;
+    min-width: 250px;
     padding: 15px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    width: 150px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.talented-team-list .artist-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.talented-team-list .artist-card img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
-    border: 2px solid var(--dark-purple);
-}
-
-.talented-team-list .artist-card h4 {
-    margin-top: 0;
-    margin-bottom: 5px;
-    color: var(--dark-text);
-    font-size: 1.1em;
-}
-
-.talented-team-list .artist-card p {
-    color: var(--medium-text);
-    font-size: 0.9em;
-    margin: 0;
-}
-
-/* --- Roster Display --- */
-.roster-section {}
-
-.roster-display-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 25px;
-}
-
-.dates-list-panel {
     background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    overflow-y: auto;
-    max-height: 600px;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
-}
-
-.dates-list-title {
-    font-size: 1.4em;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: var(--medium-text);
-}
-
-.date-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 1rem;
-    box-sizing: border-box;
-    margin-bottom: 15px;
+    border: 1px solid #eee;
 }
 
-.dates-list {
-    list-style: none;
-    padding: 0;
-}
-
-.roster-details-panel {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
-}
-
-.roster-details-title {
-    font-size: 1.5em;
+.date-picker-container label {
+    display: block;
+    margin-bottom: 10px;
     font-weight: bold;
-    margin-bottom: 20px;
-    color: var(--medium-text);
+    color: #555;
 }
 
-.daily-roster-content {}
+#datepicker {
+    width: calc(100% - 22px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+}
 
-.roster-programme-group {
-    margin-bottom: 20px;
-    background-color: var(--white);
+.roster-display {
+    flex: 2;
+    min-width: 350px;
     padding: 15px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #eee;
 }
 
-.roster-program-name {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: var(--dark-text);
+.roster-display h3 {
+    margin-top: 0;
+    color: #6a1b9a;
+}
+
+#rosterContent {
+    margin-top: 15px;
+}
+
+.program-entry {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.program-entry .program-info {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 15px;
-    border-bottom: 1px dashed var(--border-color);
-    padding-bottom: 10px;
+    font-weight: bold;
+    color: #333;
 }
 
-.programme-thumb {
+.program-entry .program-thumbnail {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.artist-crew {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 3px solid #e040fb;
+}
+
+.artist-crew .crew-member {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 10px;
+}
+
+.crew-member .artist-thumbnail {
     width: 40px;
     height: 40px;
+    border-radius: 50%;
     object-fit: cover;
-    border-radius: 5px;
-    border: 1px solid #ddd;
+    border: 2px solid #6a1b9a;
 }
 
-.roster-programme-group ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.roster-programme-group ul li {
-    padding: 8px 0;
-    color: var(--dark-text);
-    font-size: 1em;
-    border-bottom: 1px dotted #eee;
-}
-
-.roster-programme-group ul li:last-child {
-    border-bottom: none;
+.crew-member span {
+    font-size: 0.95rem;
+    color: #555;
 }
 
 .no-roster-message {
-    color: #888;
+    text-align: center;
+    color: #777;
     font-style: italic;
-    text-align: center;
     padding: 20px;
+    border: 1px dashed #ccc;
+    border-radius: 5px;
+    background-color: #f0f0f0;
 }
 
-/* --- Admin Panel Modal --- */
-.admin-panel-container {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.4);
-    overflow-y: auto;
-    padding: 20px;
+.our-makeup-artists .artist-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #eee;
 }
 
-.admin-panel-content {
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    width: auto;              /* Let width be determined by content */
-    min-width: 320px;         /* Set a sensible minimum width */
-    max-width: 95vw;          /* Don't exceed viewport width */
-    position: relative;
-    max-height: 90vh;         /* Don't exceed viewport height */
-    overflow-y: auto;
+.artist-card {
     text-align: center;
-    margin: 0 auto;
-}
-
-.close-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 2.5em;
-    color: #aaa;
-    cursor: pointer;
-    transition: color 0.3s ease;
-    line-height: 1;
-}
-
-.close-btn:hover {
-    color: #666;
-}
-
-/* --- Admin Panel Sections (Login and Features) --- */
-#adminLoginFormContainer {}
-
-.admin-section-title {
-    font-size: 2em;
-    font-weight: 600;
-    color: var(--primary-purple);
-    margin-bottom: 25px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
-    text-align: center;
-}
-
-.form-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    margin-top: 20px;
-    margin-bottom: 30px;
-    padding: 20px;
-    border: 1px solid var(--border-color);
+    background-color: #ffffff;
+    padding: 15px;
     border-radius: 8px;
-    background-color: #fefefe;
-    text-align: left;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
 }
 
-.form-group label {
+.artist-card:hover {
+    transform: translateY(-5px);
+}
+
+.artist-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e040fb;
+    margin-bottom: 10px;
+}
+
+.artist-card h4 {
+    margin: 0;
+    color: #6a1b9a;
+    font-size: 1.1rem;
+}
+
+.artist-card p {
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    background-color: #333;
+    color: white;
+    font-size: 0.9rem;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+}
+
+/* JQuery UI Datepicker Customization */
+.ui-datepicker {
+    font-size: 0.9em;
+}
+.ui-widget-header {
+    background: #6a1b9a !important;
+    border: 1px solid #6a1b9a !important;
+    color: white !important;
+}
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
+    background: #e040fb !important;
+    color: white !important;
+}
+
+/* Admin Page Specific Styles (can be in a separate admin.css or here) */
+.admin-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.admin-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.admin-tabs button {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin-right: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.admin-tabs button.active {
+    background-color: #6a1b9a;
+    color: white;
+    border-color: #6a1b9a;
+}
+
+.admin-tabs button:not(.active):hover {
+    background-color: #e6e6e6;
+}
+
+.tab-content {
+    padding: 20px 0;
+}
+
+.admin-form-group {
+    margin-bottom: 15px;
+}
+
+.admin-form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 500;
-    color: var(--medium-text);
+    font-weight: bold;
+    color: #555;
 }
 
-.form-group input[type="text"],
-.form-group input[type="password"],
-.form-group input[type="date"],
-.form-group input[type="url"],
-.form-group input[type="file"],
-.form-group select {
-    width: 100%;
-    padding: 12px;
+.admin-form-group input[type="date"],
+.admin-form-group input[type="text"],
+.admin-form-group input[type="url"],
+.admin-form-group select {
+    width: calc(100% - 22px);
+    padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1em;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Include padding in element's total width and height */
 }
 
-.form-group input:focus,
-.form-group select:focus {
-    border-color: var(--dark-purple);
-    box-shadow: 0 0 0 3px rgba(142, 36, 170, 0.2);
-    outline: none;
-}
-
-.input-with-button {
+.admin-form-group .select-with-button {
     display: flex;
     gap: 10px;
-    align-items: center;
 }
 
-.input-with-button select {
+.admin-form-group .select-with-button select {
     flex-grow: 1;
-    width: auto;
+    width: auto; /* Override calc(100% - 22px) */
 }
 
-/* --- Buttons --- */
-.btn {
-    padding: 8px 12px;
+.admin-form-group button {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.admin-form-group button:hover {
+    background-color: #45a049;
+}
+
+.add-new-artist-program-btn {
+    background-color: #e040fb !important;
+}
+.add-new-artist-program-btn:hover {
+    background-color: #c2185b !important;
+}
+
+
+button.submit-btn {
+    background-color: #6a1b9a;
+    color: white;
+    padding: 12px 25px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 0.9em;
-    margin-left: 5px;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-}
-
-.submit-btn {
-    background-color: var(--primary-purple);
-    color: var(--white);
-    padding: 14px 25px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
+    font-size: 1.1rem;
     transition: background-color 0.3s ease;
+    display: block;
     width: 100%;
-    margin-top: 10px;
-}
-
-.submit-btn:hover {
-    background-color: var(--dark-purple);
-}
-
-.add-new-btn {
-    background-color: var(--success-green);
-    color: var(--white);
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-    white-space: nowrap;
-}
-
-.add-new-btn:hover {
-    background-color: var(--dark-success-green);
-}
-
-.green-btn {
-    background-color: var(--success-green);
-}
-
-.green-btn:hover {
-    background-color: var(--dark-success-green);
-}
-
-.logout-button {
-    background-color: #dc3545;
-    color: var(--white);
-    padding: 12px 25px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    margin-top: 30px;
-}
-
-.logout-button:hover {
-    background-color: #c82333;
-}
-
-.btn-edit {
-    background-color: #007bff;
-    color: white;
-}
-.btn-edit:hover {
-    background-color: #0056b3;
-}
-
-.btn-delete {
-    background-color: #dc3545;
-    color: white;
-}
-.btn-delete:hover {
-    background-color: #c82333;
-}
-
-/* --- Admin Tabs --- */
-.admin-tabs {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 5px;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.tab-button {
-    background: none;
-    border: none;
-    padding: 15px 25px;
-    font-size: 1.1em;
-    font-weight: 600;
-    color: #777;
-    cursor: pointer;
-    transition: color 0.3s ease, border-bottom 0.3s ease;
-    border-bottom: 3px solid transparent;
-    flex-shrink: 0;
-}
-
-.tab-button:hover {
-    color: var(--primary-purple);
-}
-
-.tab-button.active-tab {
-    color: var(--primary-purple);
-    border-bottom-color: var(--primary-purple);
-    font-weight: bold;
-}
-
-.admin-features-wrapper {}
-
-.admin-section {
-    padding-top: 10px;
-}
-
-.form-section-title {
-    font-size: 1.5em;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 20px;
-    margin-top: 30px;
-    border-bottom: 1px dashed var(--border-color);
-    padding-bottom: 10px;
-    text-align: center;
-}
-
-.existing-list {
-    list-style: none;
-    padding: 0;
-    max-height: 250px;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: #fcfcfc;
     margin-top: 20px;
 }
 
-.existing-list li {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--dark-text);
+button.submit-btn:hover {
+    background-color: #4a148c;
 }
 
-.existing-list li:last-child {
-    border-bottom: none;
-}
-
-.existing-list li span {
-    flex-grow: 1;
-}
-
-.existing-list li div {
-    display: flex;
-    gap: 5px;
-}
-
-/* --- Footer --- */
-.main-footer {
-    background-color: var(--dark-footer);
-    color: var(--white);
+.message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
     text-align: center;
-    padding: 20px 0;
-    margin-top: auto;
-    font-size: 0.9em;
 }
 
-/* --- Responsive Design (Media Queries) --- */
-@media (min-width: 768px) {
-    .site-title {
-        font-size: 2.8em;
-    }
-    .main-content-grid {
-        grid-template-columns: 1fr 2fr;
-    }
-    .roster-display-grid {
-        grid-template-columns: 1fr 2fr;
-    }
-    .admin-panel-content {
-        padding: 40px;
-    }
-    .admin-section-title {
-        font-size: 2.2em;
-    }
-    .tab-button {
-        padding: 15px 30px;
-    }
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
 }
 
-@media (max-width: 767px) {
-    .site-title {
-        font-size: 1.8em;
-    }
-    .main-content-grid {
-        padding: 20px 15px;
-    }
-    .panel {
-        padding: 20px;
-    }
-    .section-title {
-        font-size: 1.8em;
-    }
-    .admin-panel-content {
-        padding: 20px;
-        max-height: 95vh;
-    }
-    .admin-section-title {
-        font-size: 1.8em;
-    }
-    .admin-tabs {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0;
-        border-bottom: none;
-    }
-    .tab-button {
-        border-bottom: none;
-        border-left: 3px solid transparent;
-        text-align: left;
-        padding: 12px 15px;
-        font-size: 1em;
-    }
-    .tab-button.active-tab {
-        border-bottom: none;
-        border-left-color: var(--primary-purple);
-        background-color: rgba(106, 5, 114, 0.05);
-    }
-    .form-layout {
-        padding: 15px;
-    }
-    .input-with-button {
-        flex-direction: column;
-        gap: 5px;
-    }
-    .add-new-btn {
-        width: 100%;
-        margin-top: 5px;
-    }
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Table styles for manage sections */
+.manage-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.manage-table th, .manage-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.manage-table th {
+    background-color: #f2f2f2;
+    color: #6a1b9a;
+}
+
+.manage-table tr:nth-child(even){background-color: #f9f9f9;}
+
+.manage-table tr:hover {background-color: #f1f1f1;}
+
+.manage-table img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    vertical-align: middle;
 }

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - TV Derana Makeup Department</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Admin Panel</h1>
+        <button id="backToHomeBtn" onclick="location.href='index.html'">Back to Home</button>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-tabs">
+            <button class="tab-button active" data-tab="addEntry">Add New Entry</button>
+            <button class="tab-button" data-tab="manageArtists">Manage Artists</button>
+            <button class="tab-button" data-tab="managePrograms">Manage Programs</button>
+        </div>
+
+        <div id="addEntry" class="tab-content active">
+            <h2>Add New Roster Entry</h2>
+            <form id="addRosterForm">
+                <div class="admin-form-group">
+                    <label for="rosterDate">Date:</label>
+                    <input type="text" id="rosterDate" readonly required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="rosterArtist">Artist:</label>
+                    <div class="select-with-button">
+                        <select id="rosterArtist" required>
+                            </select>
+                        <button type="button" class="add-new-artist-program-btn" onclick="showAddArtistForm()">Add New</button>
+                    </div>
+                </div>
+                <div class="admin-form-group">
+                    <label for="rosterTimeSlot">Time Slot:</label>
+                    <input type="text" id="rosterTimeSlot" placeholder="e.g., 10.00 AM - 12.00 PM" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="rosterProgram">Programme:</label>
+                    <div class="select-with-button">
+                        <select id="rosterProgram" required>
+                            </select>
+                        <button type="button" class="add-new-artist-program-btn" onclick="showAddProgramForm()">Add New</button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Add Roster Entry</button>
+                <div id="rosterMessage" class="message"></div>
+            </form>
+        </div>
+
+        <div id="manageArtists" class="tab-content">
+            <h2>Manage Artists</h2>
+            <button type="button" class="add-new-artist-program-btn" onclick="showAddArtistForm()">Add New Artist</button>
+            <form id="addArtistForm" style="display: none; margin-top: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 5px;">
+                <h3>Add New Artist</h3>
+                <div class="admin-form-group">
+                    <label for="artistName">Artist Name:</label>
+                    <input type="text" id="artistName" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="artistSpecialty">Specialty:</label>
+                    <input type="text" id="artistSpecialty" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="artistImageUrl">Image URL (Google Drive Shareable Link):</label>
+                    <input type="url" id="artistImageUrl" placeholder="e.g., https://drive.google.com/file/d/..." required>
+                </div>
+                <button type="submit" class="submit-btn">Save Artist</button>
+                <button type="button" class="submit-btn" style="background-color: #f44336;" onclick="hideAddArtistForm()">Cancel</button>
+                <div id="artistMessage" class="message"></div>
+            </form>
+            <div id="artistsList">
+                </div>
+        </div>
+
+        <div id="managePrograms" class="tab-content">
+            <h2>Manage Programs</h2>
+            <button type="button" class="add-new-artist-program-btn" onclick="showAddProgramForm()">Add New Program</button>
+            <form id="addProgramForm" style="display: none; margin-top: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 5px;">
+                <h3>Add New Program</h3>
+                <div class="admin-form-group">
+                    <label for="programName">Program Name:</label>
+                    <input type="text" id="programName" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="programDescription">Description:</label>
+                    <input type="text" id="programDescription">
+                </div>
+                <div class="admin-form-group">
+                    <label for="programPhotoUrl">Photo URL (Google Drive Shareable Link):</label>
+                    <input type="url" id="programPhotoUrl" placeholder="e.g., https://drive.google.com/file/d/..." required>
+                </div>
+                <button type="submit" class="submit-btn">Save Program</button>
+                <button type="button" class="submit-btn" style="background-color: #f44336;" onclick="hideAddProgramForm()">Cancel</button>
+                <div id="programMessage" class="message"></div>
+            </form>
+            <div id="programsList">
+                </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 TV Derana Makeup Department. All rights reserved.</p>
+    </footer>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
