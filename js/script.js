@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (entriesForSelectedDate && entriesForSelectedDate.length > 0) {
             const groupedByProgramme = entriesForSelectedDate.reduce((acc, entry) => {
                 // Use 'Programme' as the key, as per Apps Script response
-                const programmeName = entry['Programme'] || 'N/A'; 
+                const programmeName = entry['Program'] || 'N/A'; 
                 if (!acc[programmeName]) {
                     acc[programmeName] = [];
                 }
@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 programmeEntries.forEach(entry => {
                     const li = document.createElement('li');
                     // Use 'Artist' for the artist name from Apps Script response
-                    li.innerHTML = `<strong>${entry['Time Slot']}:</strong> ${entry['Artist']}`; 
+                    li.innerHTML = `<strong>${entry['Time Slot']}:</strong> ${entry['Artist Name']}`; 
                     ul.appendChild(li);
                 });
                 programmeElement.appendChild(ul);
