@@ -7,7 +7,7 @@ body {
 }
 
 header {
-    background-color: #6a1b9a; /* Deep Purple */
+    background-color: #5a0d0d; /* Deep Purple */
     color: white;
     padding: 1rem 0;
     text-align: center;
@@ -24,7 +24,7 @@ header h1 {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background-color: #e040fb; /* Light Purple */
+    background-color: #350202; /* Light Purple */
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -35,7 +35,7 @@ header h1 {
 }
 
 #adminLoginBtn:hover {
-    background-color: #c2185b; /* Darker Pink */
+    background-color: #b90101; /* Darker Pink */
 }
 
 main {

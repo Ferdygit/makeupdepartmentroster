@@ -55,7 +55,7 @@ $(function() {
         e.preventDefault();
         const name = $('#artistName').val();
         const specialty = $('#artistSpecialty').val();
-        const imageUrl = $('#artistImageUrl').val();
+        // const imageUrl = document.getElementById('artistImageUrl').value; // No longer needed
 
         if (!name || !specialty || !imageUrl) {
             displayMessage('artistMessage', 'Please fill all required fields.', 'error');
@@ -74,7 +74,7 @@ $(function() {
         e.preventDefault();
         const name = $('#programName').val();
         const description = $('#programDescription').val();
-        const photoUrl = $('#programPhotoUrl').val();
+        // const imageUrl = document.getElementById('artistImageUrl').value; // No longer needed
 
         if (!name || !photoUrl) {
             displayMessage('programMessage', 'Please fill all required fields (Program Name, Photo URL).', 'error');
