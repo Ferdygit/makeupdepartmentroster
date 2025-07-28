@@ -46,7 +46,7 @@ async function loadRoster(date) {
                 rosterHtml += `
                         <div class="crew-member">
                             <img src="${artist.imageUrl || 'placeholder-artist.png'}" alt="${artist.name}" class="artist-thumbnail">
-                            <span>${artist.timeSlot}: ${artist.name}</span>
+                            <span>${artist.name}: ${artist.timeSlot}</span>
                         </div>
                 `;
             });

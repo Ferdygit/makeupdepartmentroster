@@ -300,9 +300,9 @@ h2 {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 20px;
     padding: 15px;
-    background-color: #070707;
+    background-color: #fffcfc;
     border-radius: 5px;
-    border: 1px solid #0f0f0f;
+    border: 1px solid #a5a4a4;
 }
 
 .artist-card {
