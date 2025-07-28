@@ -36,10 +36,10 @@ $(function() {
     $('#addRosterForm').on('submit', async function(e) {
         e.preventDefault();
         const date = $('#rosterDate').val();
+        const program = $('#rosterProgram').val();
         const artistName = $('#rosterArtist').val();
         const timeSlot = $('#rosterTimeSlot').val();
-        const program = $('#rosterProgram').val();
-
+        
         if (!date || !artistName || !timeSlot || !program) {
             displayMessage('rosterMessage', 'Please fill all required fields.', 'error');
             return;

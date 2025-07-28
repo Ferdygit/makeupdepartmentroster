@@ -15,7 +15,7 @@
             <img src="images/DTV-Logo.gif" alt="TV Derana Logo" class="header-logo">
             <h1>Daily Roster - Makeup Department</h1>
         </div>
-        <button id="adminLoginBtn" onclick="location.href='admin.html'">Admin Login</button>
+        <button id="adminLoginBtn" class="admin-login-btn">Admin Login</button>
     </div>
     </header>
 
@@ -47,7 +47,28 @@
         <p>&copy; 2025 TV Derana Makeup Department. All rights reserved.</p>
     </footer>
 
-    <script src="js/script.js"></script>
-    
+    <div id="adminModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Admin Login</h2>
+        <form id="adminLoginForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" id="submitLoginBtn">Login</button>
+            <p class="error-message" id="loginErrorMessage"></p>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="js/script.js"></script> ```
+   
 </body>
 </html>
