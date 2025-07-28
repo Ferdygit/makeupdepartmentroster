@@ -1,48 +1,168 @@
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #202020;
+    color: #010000;
     line-height: 1.6;
 }
 
-header {
-    background-color: #5a0d0d; /* Deep Purple */
-    color: white;
-    padding: 1rem 0;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+.main-header {
+    display: flex;
+    align-items: center;
+    /* CHANGE THIS LINE */
+    justify-content: center; /* This will center the items horizontally */
+    
+    padding: 10px 20px;
+    background-color: #6a0dad; /* Example background color, adjust to your theme */
+    color: white; /* Example text color */
 }
 
-header h1 {
+/* Add a new container for the logo, title, and button if you want them grouped for centering */
+/* Let's call it .header-center-group */
+.main-header {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centers the .header-center-group */
+    padding: 10px 20px;
+    background-color: #020004;
+    color: rgb(214, 4, 4);
+}
+
+.header-center-group {
+    display: flex; /* Make this a flex container */
+    align-items: center; /* Vertically align its children */
+    gap: 20px; /* Adjust spacing between the left content and the button */
+    /* No need for margin: auto if parent is justify-content: center */
+}
+
+.header-left-content {
+    display: flex; /* For logo and title */
+    align-items: center;
+    gap: 15px; /* Space between logo and title */
+}
+
+.header-logo {
+    height: 100px;
+    width: auto;
+}
+
+.main-header h1 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: 2em;
+    white-space: nowrap;
 }
 
-#adminLoginBtn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background-color: #350202; /* Light Purple */
-    color: white;
+.admin-login-btn {
+    padding: 10px 15px;
+    background-color: #500101;
+    color: rgb(246, 246, 246); /* Ensure text color is white */
     border: none;
-    padding: 0.5rem 1rem;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.3s ease;
+    font-size: 1em;
 }
 
-#adminLoginBtn:hover {
-    background-color: #b90101; /* Darker Pink */
+.admin-login-btn:hover {
+    background-color: #ea0202;
+}
+
+/* Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    padding-top: 60px; /* Location of the box */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 5% from the top and centered */
+    padding: 30px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 400px; /* Max width for larger screens */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    position: relative;
+    text-align: center; /* Center the form elements */
+}
+
+/* The Close Button */
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Form Group Styling */
+.modal-content .form-group {
+    margin-bottom: 15px;
+    text-align: left; /* Align labels/inputs within their group */
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="password"] {
+    width: calc(100% - 22px); /* Account for padding and border */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    font-size: 1em;
+}
+
+.modal-content #submitLoginBtn {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 10px;
+    width: 100%; /* Make button full width */
+}
+
+.modal-content #submitLoginBtn:hover {
+    background-color: #45a049;
+}
+
+.modal-content .error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 10px;
 }
 
 main {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 1rem;
-    background-color: white;
+    background-color: rgb(29, 29, 29);
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     border-radius: 8px;
 }
@@ -56,8 +176,8 @@ main {
 }
 
 h2 {
-    color: #6a1b9a;
-    border-bottom: 2px solid #e040fb;
+    color: rgb(214, 4, 4);
+    border-bottom: 2px solid rgb(214, 4, 4);
     padding-bottom: 0.5rem;
     margin-top: 0;
 }
@@ -104,7 +224,7 @@ h2 {
 
 .roster-display h3 {
     margin-top: 0;
-    color: #6a1b9a;
+    color: #c70505;
 }
 
 #rosterContent {
@@ -142,7 +262,7 @@ h2 {
 .artist-crew {
     margin-top: 10px;
     padding-left: 20px;
-    border-left: 3px solid #e040fb;
+    border-left: 3px solid #b20202;
 }
 
 .artist-crew .crew-member {
@@ -157,7 +277,7 @@ h2 {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #6a1b9a;
+    border: 2px solid #ac0202;
 }
 
 .crew-member span {
@@ -180,17 +300,17 @@ h2 {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 20px;
     padding: 15px;
-    background-color: #f9f9f9;
+    background-color: #070707;
     border-radius: 5px;
-    border: 1px solid #eee;
+    border: 1px solid #0f0f0f;
 }
 
 .artist-card {
     text-align: center;
-    background-color: #ffffff;
+    background-color: #fafafa;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgb(216, 216, 216);
     transition: transform 0.2s ease-in-out;
 }
 
@@ -203,13 +323,13 @@ h2 {
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #e040fb;
+    border: 3px solid #b20101;
     margin-bottom: 10px;
 }
 
 .artist-card h4 {
     margin: 0;
-    color: #6a1b9a;
+    color: #df0202;
     font-size: 1.1rem;
 }
 
