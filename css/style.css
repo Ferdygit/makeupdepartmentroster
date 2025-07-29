@@ -293,7 +293,6 @@ h2 {
 .artist-crew {
     /* margin-top: 10px; - This is now handled by margin-bottom on .program-info */
     padding-left: 20px;
-    border-left: 3px solid #b20202;
     /* To stack multiple crew members vertically within artist-crew */
     display: flex;
     flex-direction: column;
