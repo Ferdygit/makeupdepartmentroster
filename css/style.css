@@ -21,9 +21,9 @@ body {
 }
 
 .main-header .header-logo {
-    max-height: 80px; /* Adjust logo size as needed */
+    max-height: 100px; /* Adjust logo size as needed */
     width: auto; /* Maintain aspect ratio */
-    margin-bottom: 10px; /* Space below the logo */
+    margin-bottom: 1px; /* Space below the logo */
     /* If your GIF has a solid background and doesn't blend well,
        you might need a version with a transparent background. */
 }
