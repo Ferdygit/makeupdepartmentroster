@@ -7,55 +7,54 @@ body {
 }
 
 .main-header {
-    display: flex;
-    align-items: center;
-    /* CHANGE THIS LINE */
-    justify-content: center; /* This will center the items horizontally */
-    
-    padding: 10px 20px;
-    background-color: #6a0dad; /* Example background color, adjust to your theme */
-    color: white; /* Example text color */
+    background-color: #000000; /* Purple background, matching your screenshots */
+    color: #a70202; /* White text for contrast */
+    padding: 10px 20px; /* Padding around the content */
+
+    display: flex; /* Make it a flex container */
+    flex-direction: column; /* THIS IS KEY: Stack children vertically */
+    align-items: center; /* Center items horizontally within the header */
+    justify-content: center; /* Center items vertically if there's extra space in the header */
+
+    width: 100%; /* Ensure it spans full width */
+    box-sizing: border-box; /* Include padding in element's total width and height */
 }
 
-/* Add a new container for the logo, title, and button if you want them grouped for centering */
-/* Let's call it .header-center-group */
-.main-header {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Centers the .header-center-group */
-    padding: 10px 20px;
-    background-color: #020004;
-    color: rgb(214, 4, 4);
-}
-
-.header-center-group {
-    display: flex; /* Make this a flex container */
-    align-items: center; /* Vertically align its children */
-    gap: 20px; /* Adjust spacing between the left content and the button */
-    /* No need for margin: auto if parent is justify-content: center */
-}
-
-.header-left-content {
-    display: flex; /* For logo and title */
-    align-items: center;
-    gap: 15px; /* Space between logo and title */
-}
-
-.header-logo {
-    height: 100px;
-    width: auto;
+.main-header .header-logo {
+    max-height: 80px; /* Adjust logo size as needed */
+    width: auto; /* Maintain aspect ratio */
+    margin-bottom: 10px; /* Space below the logo */
+    /* If your GIF has a solid background and doesn't blend well,
+       you might need a version with a transparent background. */
 }
 
 .main-header h1 {
-    margin: 0;
-    font-size: 2em;
-    white-space: nowrap;
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 15px; /* Space below the title */
+    font-size: 2em; /* Adjust font size as needed */
+    text-align: center; /* Ensure text is centered */
+    white-space: nowrap; /* Prevent text from wrapping if too long */
+}
+
+.main-header .admin-login-btn {
+    background-color: rgb(98, 0, 0); /* White button background */
+    color: #ffffff; /* Purple text for button, matching header background */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.main-header .admin-login-btn:hover {
+    background-color: #a70202; /* Slightly darker white on hover */
 }
 
 .admin-login-btn {
     padding: 10px 15px;
     background-color: #500101;
-    color: rgb(246, 246, 246); /* Ensure text color is white */
+    color: rgb(154, 2, 2); /* Ensure text color is white */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -63,7 +62,7 @@ body {
 }
 
 .admin-login-btn:hover {
-    background-color: #ea0202;
+    background-color: #680101;
 }
 
 /* Modal (background) */
