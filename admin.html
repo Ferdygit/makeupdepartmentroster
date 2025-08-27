@@ -23,35 +23,47 @@
         </div>
 
         <div id="addEntry" class="tab-content active">
-            <h2>Add New Roster Entry</h2>
-            <form id="addRosterForm">
-                <div class="admin-form-group">
-                    <label for="rosterDate">Date:</label>
-                    <input type="text" id="rosterDate" readonly required>
-                </div>
-                <div class="admin-form-group">
-                    <label for="rosterArtist">Artist:</label>
-                    <div class="select-with-button">
-                        <select id="rosterArtist" required>
-                            </select>
-                        <button type="button" class="add-new-artist-program-btn" onclick="showAddArtistForm()">Add New</button>
-                    </div>
-                </div>
-                <div class="admin-form-group">
-                    <label for="rosterTimeSlot">Time Slot:</label>
-                    <input type="text" id="rosterTimeSlot" placeholder="e.g., 10.00 AM - 12.00 PM" required>
-                </div>
-                <div class="admin-form-group">
-                    <label for="rosterProgram">Programme:</label>
-                    <div class="select-with-button">
-                        <select id="rosterProgram" required>
-                            </select>
-                        <button type="button" class="add-new-artist-program-btn" onclick="showAddProgramForm()">Add New</button>
-                    </div>
-                </div>
-                <button type="submit" class="submit-btn">Add Roster Entry</button>
-                <div id="rosterMessage" class="message"></div>
-            </form>
+            <h3>Add New Roster Entry</h3>
+            <div class="input-form">
+                <label for="entry-date">Date:</label>
+                <input type="date" id="entry-date" required>
+
+                <label for="entry-artist">Artist:</label>
+                <select id="entry-artist" required></select>
+                <button id="add-artist-btn" class="add-btn">+</button>
+
+                <label for="entry-time-slot">Time Slot:</label>
+                <input type="text" id="entry-time-slot" placeholder="e.g., 10.00 AM - 12.00 PM" required>
+
+                <label for="entry-program">Programme:</label>
+                <select id="entry-program" required></select>
+                <button id="add-program-btn" class="add-btn">+</button>
+                
+                <button id="add-entry-btn" class="submit-btn">Add to Preview</button>
+            </div>
+
+            <hr>
+            
+            <h3>Preview of the roster entry for the selected date</h3>
+            <div class="roster-preview-container">
+                <table id="roster-preview-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time Slot</th>
+                            <th>Artist Name</th>
+                            <th>Program</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+                <p id="no-preview-message" class="hidden-message">No entries added yet for this date.</p>
+            </div>
+
+            <hr>
+            <button id="save-roster-btn" class="submit-btn full-width-btn">Save Daily Roster</button>
         </div>
 
         <div id="manageArtists" class="tab-content">

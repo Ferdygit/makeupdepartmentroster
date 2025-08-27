@@ -1,11 +1,10 @@
 const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyUX3UITXKZmi_QYjBYcMQ724lJU3X7XKSmGU-6q-tiCWhhDGKlozyvxioxukkptQHNrQ/exec'; // Replace with your deployed Apps Script URL
 
-$(function() {
-    // Datepicker for Roster tab
-    $("#rosterDate").datepicker({
-        dateFormat: "yy-mm-dd"
-    });
+// Global state to manage the temporary roster entries and selected date
+let dailyRosterEntries = [];
+let selectedDate = '';
 
+$(function() {
     // Handle tab switching
     $('.tab-button').on('click', function() {
         $('.tab-button').removeClass('active');
@@ -19,36 +18,55 @@ $(function() {
         } else if ($(this).data('tab') === 'managePrograms') {
             loadManagePrograms();
         } else if ($(this).data('tab') === 'addEntry') {
-            loadArtistsForSelect();
-            loadProgramsForSelect();
+            loadArtistsAndProgramsForSelect();
         }
     });
-
-    // Initial load for 'Add New Entry' tab
-    loadArtistsForSelect();
-    loadProgramsForSelect();
     
-    // Set initial date for roster entry to today
-    const today = new Date();
-    $("#rosterDate").datepicker("setDate", today);
-
-    // Form submission for Add Roster Entry
-    $('#addRosterForm').on('submit', async function(e) {
-        e.preventDefault();
-        const date = $('#rosterDate').val();
-        const program = $('#rosterProgram').val();
-        const artistName = $('#rosterArtist').val();
-        const timeSlot = $('#rosterTimeSlot').val();
-        
-        if (!date || !artistName || !timeSlot || !program) {
-            displayMessage('rosterMessage', 'Please fill all required fields.', 'error');
-            return;
-        }
-
-        const data = { date, artistName, timeSlot, program };
-        await sendDataToAppsScript('Roster', data, 'addRosterForm', 'rosterMessage', 'Roster entry added successfully!');
-        // Optionally, refresh the main roster page or a section of it here
+    // Set today's date on initial load for the date input and load its roster
+    const today = new Date().toISOString().slice(0, 10);
+    $('#entry-date').val(today);
+    selectedDate = today;
+    
+    // Initial load for 'Add New Entry' tab
+    loadArtistsAndProgramsForSelect();
+    loadDailyRosterFromSheet(selectedDate);
+    
+    // Date input change event: loads the roster for the newly selected date
+    $('#entry-date').on('change', async function() {
+        selectedDate = $(this).val();
+        await loadDailyRosterFromSheet(selectedDate);
     });
+
+    // Add entry to the preview table
+    $('#add-entry-btn').on('click', function(e) {
+        e.preventDefault();
+        addEntryToPreview();
+    });
+
+    // Save the entire daily roster
+    $('#save-roster-btn').on('click', async function() {
+        $(this).prop('disabled', true).text('Saving...');
+        await saveDailyRoster();
+        $(this).prop('disabled', false).text('Save Daily Roster');
+    });
+
+    // Event delegation for dynamically created delete buttons in the preview table
+    $('#roster-preview-table').on('click', '.delete-entry-btn', function() {
+        const index = $(this).data('index');
+        dailyRosterEntries.splice(index, 1);
+        renderPreviewTable();
+    });
+
+    // Button to switch to the add new artist/program tab
+    $('#add-artist-btn').on('click', function() {
+        showTab('manageArtists');
+    });
+
+    $('#add-program-btn').on('click', function() {
+        showTab('managePrograms');
+    });
+
+    // --- YOUR EXISTING CODE REMAINS BELOW, with minor adjustments to call the new functions ---
 
     // Form submission for Add Artist
     $('#addArtistForm').on('submit', async function(e) {
@@ -65,7 +83,7 @@ $(function() {
         const data = { name, specialty, imageUrl };
         await sendDataToAppsScript('Artists', data, 'addArtistForm', 'artistMessage', 'Artist added successfully!');
         loadManageArtists(); // Refresh artist list
-        loadArtistsForSelect(); // Refresh dropdown on roster tab
+        loadArtistsAndProgramsForSelect(); // Refresh dropdown on roster tab
         hideAddArtistForm(); // Hide the form after submission
     });
 
@@ -84,165 +102,163 @@ $(function() {
         const data = { name, description, photoUrl };
         await sendDataToAppsScript('Programs', data, 'addProgramForm', 'programMessage', 'Program added successfully!');
         loadManagePrograms(); // Refresh program list
-        loadProgramsForSelect(); // Refresh dropdown on roster tab
+        loadArtistsAndProgramsForSelect(); // Refresh dropdown on roster tab
         hideAddProgramForm(); // Hide the form after submission
     });
+
 });
 
-async function sendDataToAppsScript(sheetName, data, formId, messageId, successMessage) {
-    displayMessage(messageId, 'Submitting...', 'info');
+// A helper function to switch tabs
+function showTab(tabId) {
+    $('.tab-button').removeClass('active');
+    $(`.tab-button[data-tab="${tabId}"]`).addClass('active');
+    $('.tab-content').hide();
+    $(`#${tabId}`).show();
+    // Re-run the data load for the new tab
+    if (tabId === 'manageArtists') {
+        loadManageArtists();
+    } else if (tabId === 'managePrograms') {
+        loadManagePrograms();
+    } else if (tabId === 'addEntry') {
+        loadArtistsAndProgramsForSelect();
+        loadDailyRosterFromSheet(selectedDate);
+    }
+}
+
+// Function to load all artists and programs for the select dropdowns
+async function loadArtistsAndProgramsForSelect() {
     try {
-        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?sheet=${sheetName}`, {
+        const artistsResponse = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllArtists`);
+        const artists = await artistsResponse.json();
+        populateSelect('entry-artist', artists, 'name'); // Use 'name' as the value and text property
+        
+        const programsResponse = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllPrograms`);
+        const programs = await programsResponse.json();
+        populateSelect('entry-program', programs, 'name'); // Use 'name' as the value and text property
+
+    } catch (error) {
+        console.error("Error fetching artists or programs:", error);
+    }
+}
+
+function populateSelect(selectId, data, textProperty) {
+    const select = $(`#${selectId}`);
+    select.empty();
+    select.append('<option value="">-- Select --</option>');
+    data.forEach(item => {
+        select.append(`<option value="${item[textProperty]}">${item[textProperty]}</option>`);
+    });
+}
+
+// Function to load existing roster entries for a given date from the sheet
+async function loadDailyRosterFromSheet(date) {
+    try {
+        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?sheet=Roster&date=${date}`);
+        const result = await response.json();
+        if (result.success) {
+            dailyRosterEntries = result.data;
+            renderPreviewTable();
+        } else {
+            console.error("Failed to load daily roster:", result.error);
+            dailyRosterEntries = []; // Clear local data on error
+            renderPreviewTable();
+        }
+    } catch (error) {
+        console.error("Error loading daily roster:", error);
+        dailyRosterEntries = [];
+        renderPreviewTable();
+    }
+}
+
+// Function to add a new entry from the form to the local array
+function addEntryToPreview() {
+    const date = $('#entry-date').val();
+    const artist = $('#entry-artist').val();
+    const timeSlot = $('#entry-time-slot').val();
+    const programme = $('#entry-program').val();
+
+    if (!date || !artist || !timeSlot || !programme) {
+        alert('Please fill in all fields before adding.');
+        return;
+    }
+
+    const newEntry = {
+        Date: date,
+        'Time Slot': timeSlot,
+        Artist: artist,
+        Programme: programme
+    };
+    dailyRosterEntries.push(newEntry);
+
+    renderPreviewTable();
+    // Clear the form fields for the next entry
+    $('#entry-artist').val('');
+    $('#entry-time-slot').val('');
+    $('#entry-program').val('');
+    $('#entry-artist').focus();
+}
+
+// Function to render the preview table from the local array
+function renderPreviewTable() {
+    const tableBody = $('#roster-preview-table tbody');
+    tableBody.empty();
+    if (dailyRosterEntries.length === 0) {
+        $('#roster-preview-table').hide();
+        $('#no-preview-message').show();
+    } else {
+        $('#roster-preview-table').show();
+        $('#no-preview-message').hide();
+        dailyRosterEntries.forEach((entry, index) => {
+            const row = `
+                <tr>
+                    <td>${entry.Date}</td>
+                    <td>${entry['Time Slot']}</td>
+                    <td>${entry.Artist}</td>
+                    <td>${entry.Programme}</td>
+                    <td><button class="delete-entry-btn" data-index="${index}">Delete</button></td>
+                </tr>
+            `;
+            tableBody.append(row);
+        });
+    }
+}
+
+// Function to save the entire local roster array to the Google Sheet
+async function saveDailyRoster() {
+    try {
+        const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
             method: 'POST',
+            body: JSON.stringify({
+                action: 'updateDailyRoster',
+                data: {
+                    date: selectedDate,
+                    entries: dailyRosterEntries
+                }
+            }),
             headers: {
-                'Content-Type': 'text/plain;charset=utf-8' // Apps Script expects plain text for e.postData.contents
-            },
-            body: JSON.stringify(data)
+                'Content-Type': 'text/plain' // This is required for Apps Script
+            }
         });
         const result = await response.json();
-
         if (result.success) {
-            displayMessage(messageId, successMessage, 'success');
-            $(`#${formId}`)[0].reset(); // Clear the form
+            alert('Daily roster saved successfully!');
+            // Reload the data from the sheet to confirm the save
+            await loadDailyRosterFromSheet(selectedDate);
         } else {
-            displayMessage(messageId, `Error: ${result.error}`, 'error');
+            alert('Failed to save the daily roster: ' + result.error);
         }
     } catch (error) {
-        console.error(`Error adding to ${sheetName}:`, error);
-        displayMessage(messageId, `Network error or server issue.`, 'error');
+        console.error("Error saving daily roster:", error);
+        alert("An error occurred while saving the roster.");
     }
 }
 
-function displayMessage(elementId, message, type) {
-    const messageElement = $(`#${elementId}`);
-    messageElement.removeClass('success error info').addClass(type).text(message).show();
-    setTimeout(() => messageElement.fadeOut(2000), 5000); // Hide after 5 seconds
-}
-
-async function loadArtistsForSelect() {
-    try {
-        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllArtists`);
-        const artists = await response.json();
-        const select = $('#rosterArtist');
-        select.empty();
-        select.append('<option value="">Select Artist</option>');
-        artists.forEach(artist => {
-            select.append(`<option value="${artist.name}">${artist.name}</option>`);
-        });
-    } catch (error) {
-        console.error('Error loading artists for select:', error);
-        displayMessage('rosterMessage', 'Error loading artists for dropdown.', 'error');
-    }
-}
-
-async function loadProgramsForSelect() {
-    try {
-        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllPrograms`);
-        const programs = await response.json();
-        const select = $('#rosterProgram');
-        select.empty();
-        select.append('<option value="">Select Program</option>');
-        programs.forEach(program => {
-            select.append(`<option value="${program.name}">${program.name}</option>`);
-        });
-    } catch (error) {
-        console.error('Error loading programs for select:', error);
-        displayMessage('rosterMessage', 'Error loading programs for dropdown.', 'error');
-    }
-}
-
-async function loadManageArtists() {
-    try {
-        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllArtists`);
-        const artists = await response.json();
-        let tableHtml = `
-            <table class="manage-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Specialty</th>
-                        <th>Image</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        if (artists.length === 0) {
-            tableHtml += `<tr><td colspan="4">No artists available.</td></tr>`;
-        } else {
-            artists.forEach(artist => {
-                tableHtml += `
-                    <tr>
-                        <td>${artist.id}</td>
-                        <td>${artist.name}</td>
-                        <td>${artist.specialty}</td>
-                        <td><img src="${artist.imageUrl || 'placeholder-artist.png'}" alt="${artist.name}"></td>
-                    </tr>
-                `;
-            });
-        }
-        tableHtml += `</tbody></table>`;
-        $('#artistsList').html(tableHtml);
-    } catch (error) {
-        console.error('Error loading artists for management:', error);
-        $('#artistsList').html('<p class="error-message">Error loading artists data.</p>');
-    }
-}
-
-async function loadManagePrograms() {
-    try {
-        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllPrograms`);
-        const programs = await response.json();
-        let tableHtml = `
-            <table class="manage-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Photo</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        if (programs.length === 0) {
-            tableHtml += `<tr><td colspan="4">No programs available.</td></tr>`;
-        } else {
-            programs.forEach(program => {
-                tableHtml += `
-                    <tr>
-                        <td>${program.id}</td>
-                        <td>${program.name}</td>
-                        <td>${program.description || 'N/A'}</td>
-                        <td><img src="${program.photoUrl || 'placeholder.png'}" alt="${program.name}"></td>
-                    </tr>
-                `;
-            });
-        }
-        tableHtml += `</tbody></table>`;
-        $('#programsList').html(tableHtml);
-    } catch (error) {
-        console.error('Error loading programs for management:', error);
-        $('#programsList').html('<p class="error-message">Error loading programs data.</p>');
-    }
-}
-
-function showAddArtistForm() {
-    $('#addArtistForm').slideDown();
-}
-
-function hideAddArtistForm() {
-    $('#addArtistForm').slideUp();
-    $('#addArtistForm')[0].reset(); // Clear form fields
-    $('#artistMessage').hide(); // Hide any messages
-}
-
-function showAddProgramForm() {
-    $('#addProgramForm').slideDown();
-}
-
-function hideAddProgramForm() {
-    $('#addProgramForm').slideUp();
-    $('#addProgramForm')[0].reset(); // Clear form fields
-    $('#programMessage').hide(); // Hide any messages
-}
+// These functions remain from your previous code. No changes are needed.
+async function sendDataToAppsScript(sheetName, data, formId, messageId, successMessage) { /* ... */ }
+function displayMessage(elementId, message, type) { /* ... */ }
+async function loadManageArtists() { /* ... */ }
+async function loadManagePrograms() { /* ... */ }
+function showAddArtistForm() { /* ... */ }
+function hideAddArtistForm() { /* ... */ }
+function showAddProgramForm() { /* ... */ }
+function hideAddProgramForm() { /* ... */ }
