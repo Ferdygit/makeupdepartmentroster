@@ -219,3 +219,177 @@ function displayMessage(elementId, message, type) {
 }
 
 // ... (rest of your admin.js for manageArtists, managePrograms, show/hide forms, etc.)
+
+// --- Manage Artists Tab ---
+async function loadManageArtists() {
+    const listDiv = $('#artistsList');
+    listDiv.html('<p>Loading artists...</p>');
+    try {
+        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllArtists`);
+        const artists = await response.json();
+        let tableHtml = `<table class="manage-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Specialty</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        if (artists.length > 0) {
+            artists.forEach(artist => {
+                tableHtml += `
+                    <tr>
+                        <td><img src="${artist.imageUrl || 'Images/placeholder-artist.png'}" alt="${artist.name}"></td>
+                        <td>${artist.name}</td>
+                        <td>${artist.specialty}</td>
+                        <td><button onclick="deleteArtist('${artist.id}')">Delete</button></td>
+                    </tr>
+                `;
+            });
+        } else {
+            tableHtml += `<tr><td colspan="4">No artists found.</td></tr>`;
+        }
+        tableHtml += `</tbody></table>`;
+        listDiv.html(tableHtml);
+    } catch (error) {
+        listDiv.html('<p>Error loading artists.</p>');
+    }
+}
+
+// --- Manage Programs Tab ---
+async function loadManagePrograms() {
+    const listDiv = $('#programsList');
+    listDiv.html('<p>Loading programs...</p>');
+    try {
+        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllPrograms`);
+        const programs = await response.json();
+        let tableHtml = `<table class="manage-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        if (programs.length > 0) {
+            programs.forEach(program => {
+                tableHtml += `
+                    <tr>
+                        <td><img src="${program.photoUrl || 'Images/placeholder.png'}" alt="${program.name}"></td>
+                        <td>${program.name}</td>
+                        <td>${program.description || ''}</td>
+                        <td><button onclick="deleteProgram('${program.id}')">Delete</button></td>
+                    </tr>
+                `;
+            });
+        } else {
+            tableHtml += `<tr><td colspan="4">No programs found.</td></tr>`;
+        }
+        tableHtml += `</tbody></table>`;
+        listDiv.html(tableHtml);
+    } catch (error) {
+        listDiv.html('<p>Error loading programs.</p>');
+    }
+}
+
+// --- Form Visibility ---
+function showAddArtistForm() { $('#addArtistForm').show(); }
+function hideAddArtistForm() { $('#addArtistForm').hide(); }
+function showAddProgramForm() { $('#addProgramForm').show(); }
+function hideAddProgramForm() { $('#addProgramForm').hide(); }
+
+// --- Form Submissions ---
+$('#addArtistForm').on('submit', async function(e) {
+    e.preventDefault();
+    const payload = {
+        name: $('#artistName').val(),
+        specialty: $('#artistSpecialty').val(),
+        imageUrl: $('#artistImageUrl').val(),
+    };
+    try {
+        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?sheet=Artists&type=addArtist`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.success) {
+            displayMessage('artistMessage', 'Artist added successfully!', 'success');
+            loadManageArtists();
+            hideAddArtistForm();
+            this.reset();
+        } else {
+            displayMessage('artistMessage', result.error || 'Error saving artist.', 'error');
+        }
+    } catch (err) {
+        displayMessage('artistMessage', 'Network error or server issue.', 'error');
+    }
+});
+
+$('#addProgramForm').on('submit', async function(e) {
+    e.preventDefault();
+    const payload = {
+        name: $('#programName').val(),
+        description: $('#programDescription').val(),
+        photoUrl: $('#programPhotoUrl').val(),
+    };
+    try {
+        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?sheet=Programs&type=addProgram`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.success) {
+            displayMessage('programMessage', 'Program added successfully!', 'success');
+            loadManagePrograms();
+            hideAddProgramForm();
+            this.reset();
+        } else {
+            displayMessage('programMessage', result.error || 'Error saving program.', 'error');
+        }
+    } catch (err) {
+        displayMessage('programMessage', 'Network error or server issue.', 'error');
+    }
+});
+
+// --- Delete Functions ---
+async function deleteArtist(id) {
+    if (!confirm('Are you sure you want to delete this artist?')) return;
+    try {
+        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?sheet=Artists&type=deleteRow&id=${id}`, {
+            method: 'POST'
+        });
+        const result = await response.json();
+        if (result.success) {
+            displayMessage('artistMessage', 'Artist deleted successfully!', 'success');
+            loadManageArtists();
+        } else {
+            displayMessage('artistMessage', result.error || 'Error deleting artist.', 'error');
+        }
+    } catch (err) {
+        displayMessage('artistMessage', 'Network error or server issue.', 'error');
+    }
+}
+
+async function deleteProgram(id) {
+    if (!confirm('Are you sure you want to delete this program?')) return;
+    try {
+        const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?sheet=Programs&type=deleteRow&id=${id}`, {
+            method: 'POST'
+        });
+        const result = await response.json();
+        if (result.success) {
+            displayMessage('programMessage', 'Program deleted successfully!', 'success');
+            loadManagePrograms();
+        } else {
+            displayMessage('programMessage', result.error || 'Error deleting program.', 'error');
+        }
+    } catch (err) {
+        displayMessage('programMessage', 'Network error or server issue.', 'error');
+    }
+}

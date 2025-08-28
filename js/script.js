@@ -47,6 +47,7 @@ $(function() {
             event.preventDefault();
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
+            
             if (username === "admin" && password === "password123") {
                 loginErrorMessage.textContent = "";
                 alert("Login successful!");
@@ -56,7 +57,6 @@ $(function() {
             }
         });
     }
-    // --- End Admin Modal Logic ---
 });
 
 // Helper function to set and load the selected date's roster
@@ -120,9 +120,9 @@ async function loadAllArtists() {
             artists.forEach(artist => {
                 artistsHtml += `
                     <div class="artist-card">
-                        <img src="${artist.imageUrl || 'placeholder-artist.png'}" alt="${artist.name}">
-                        <h4>${artist.name}</h4>
-                        <p>${artist.specialty}</p>
+                        <img src="${artist['Image URL'] || 'placeholder-artist.png'}" alt="${artist['Artist Name']}">
+                        <h4>${artist['Artist Name']}</h4>
+                        <p>${artist.Specialty}</p>
                     </div>
                 `;
             });
