@@ -112,6 +112,11 @@ function showTab(tabId) {
     }
 }
 
+function showCorsError(dataType) {
+    const message = `<strong>Error:</strong> Could not load ${dataType} data. This may be a permission issue with the backend Google Apps Script. See the <a href="README.md" target="_blank">README.md</a> file for troubleshooting steps.`;
+    $('#cors-error-message').html(message).show();
+}
+
 // Function to load all artists and programs for the select dropdowns
 async function loadArtistsAndProgramsForSelect() {
     try {
@@ -127,6 +132,7 @@ async function loadArtistsAndProgramsForSelect() {
 
     } catch (error) {
         console.error("Error fetching artists or programs:", error);
+        showCorsError('artists or programs');
         displayMessage('rosterMessage', 'Error loading artists or programs for dropdowns.', 'error');
     }
 }
@@ -158,6 +164,7 @@ async function loadDailyRosterFromSheet(date) {
         console.error("Error loading daily roster:", error);
         dailyRosterEntries = [];
         renderPreviewTable();
+        showCorsError('daily roster');
     }
 }
 
@@ -240,7 +247,19 @@ async function saveDailyRoster() {
     } catch (error) {
         console.error("Error saving daily roster:", error);
         alert("An error occurred while saving the roster.");
+        showCorsError('saving daily roster');
     }
+}
+
+function convertGoogleDriveUrl(url) {
+    if (typeof url !== 'string' || !url.includes('drive.google.com')) {
+        return url; // Return original if not a G-Drive URL
+    }
+    const fileId = url.match(/d\/(.+?)\//);
+    if (fileId && fileId[1]) {
+        return `https://drive.google.com/uc?export=view&id=${fileId[1]}`;
+    }
+    return url; // Return original if pattern doesn't match
 }
 
 // Global functions for add/hide forms
@@ -286,6 +305,7 @@ async function sendDataToAppsScript(sheetName, data, formId, messageId, successM
         }
     } catch (error) {
         console.error(`Error adding to ${sheetName}:`, error);
+        showCorsError(`adding to ${sheetName}`);
         displayMessage(messageId, `Network error or server issue.`, 'error');
     }
 }
@@ -316,12 +336,13 @@ async function loadManageArtists() {
             tableHtml += `<tr><td colspan="4">No artists available.</td></tr>`;
         } else {
             artists.forEach(artist => {
+                const artistImageUrl = convertGoogleDriveUrl(artist['Image URL']);
                 tableHtml += `
                     <tr>
                         <td>${artist['Artist ID']}</td>
                         <td>${artist['Artist Name']}</td>
                         <td>${artist.Specialty}</td>
-                        <td><img src="${artist['Image URL'] || 'placeholder-artist.png'}" alt="${artist['Artist Name']}"></td>
+                        <td><img src="${artistImageUrl || 'Images/placeholder-artist.png'}" alt="${artist['Artist Name']}"></td>
                     </tr>
                 `;
             });
@@ -331,6 +352,7 @@ async function loadManageArtists() {
     } catch (error) {
         console.error('Error loading artists for management:', error);
         $('#artistsList').html('<p class="error-message">Error loading artists data.</p>');
+        showCorsError('artists');
     }
 }
 
@@ -354,12 +376,13 @@ async function loadManagePrograms() {
             tableHtml += `<tr><td colspan="4">No programs available.</td></tr>`;
         } else {
             programs.forEach(program => {
+                const programPhotoUrl = convertGoogleDriveUrl(program.PhotoURL);
                 tableHtml += `
                     <tr>
                         <td>${program.ID}</td>
                         <td>${program.Name}</td>
                         <td>${program.Description || 'N/A'}</td>
-                        <td><img src="${program.PhotoURL || 'placeholder.png'}" alt="${program.Name}"></td>
+                        <td><img src="${programPhotoUrl || 'Images/placeholder.png'}" alt="${program.Name}"></td>
                     </tr>
                 `;
             });
@@ -369,5 +392,6 @@ async function loadManagePrograms() {
     } catch (error) {
         console.error('Error loading programs for management:', error);
         $('#programsList').html('<p class="error-message">Error loading programs data.</p>');
+        showCorsError('programs');
     }
 }

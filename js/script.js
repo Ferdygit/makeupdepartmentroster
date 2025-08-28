@@ -73,6 +73,17 @@ $(function() {
 
 }); // End of $(function() { ... }); block
 
+function convertGoogleDriveUrl(url) {
+    if (typeof url !== 'string' || !url.includes('drive.google.com')) {
+        return url; // Return original if not a G-Drive URL
+    }
+    const fileId = url.match(/d\/(.+?)\//);
+    if (fileId && fileId[1]) {
+        return `https://drive.google.com/uc?export=view&id=${fileId[1]}`;
+    }
+    return url; // Return original if pattern doesn't match
+}
+
 // loadRoster and loadAllArtists functions (these can remain outside the $(function) block
 // because they are called from within it, and their definitions don't rely on the DOM being ready
 // to find elements *themselves* right away, only when they are called.)
@@ -92,18 +103,20 @@ async function loadRoster(date) {
         let rosterHtml = '';
         for (const programName in data) {
             const program = data[programName];
+            const programPhotoUrl = convertGoogleDriveUrl(program.programDetails.photoUrl);
             rosterHtml += `
                 <div class="program-entry">
                     <div class="program-info">
-                        <img src="${program.programDetails.photoUrl || 'placeholder.png'}" alt="${program.programDetails.name}" class="program-thumbnail">
+                        <img src="${programPhotoUrl || 'Images/placeholder.png'}" alt="${program.programDetails.name}" class="program-thumbnail">
                         <span>${program.programDetails.name}</span>
                     </div>
                     <div class="artist-crew">
             `;
             program.artists.forEach(artist => {
+                const artistImageUrl = convertGoogleDriveUrl(artist.imageUrl);
                 rosterHtml += `
                         <div class="crew-member">
-                            <img src="${artist.imageUrl || 'placeholder-artist.png'}" alt="${artist.name}" class="artist-thumbnail">
+                            <img src="${artistImageUrl || 'Images/placeholder-artist.png'}" alt="${artist.name}" class="artist-thumbnail">
                             <span>${artist.name}: ${artist.timeSlot}</span>
                         </div>
                 `;
@@ -118,6 +131,7 @@ async function loadRoster(date) {
     } catch (error) {
         console.error('Error loading roster:', error);
         $('#rosterContent').html('<p class="no-roster-message">Error loading roster. Please try again later.</p>');
+        $('#cors-error-message').html('<strong>Error:</strong> Could not load roster data. This may be a permission issue with the backend Google Apps Script. See the <a href="README.md" target="_blank">README.md</a> file for troubleshooting steps.').show();
     }
 }
 
@@ -131,9 +145,10 @@ async function loadAllArtists() {
             artistsHtml = '<p>No artists found.</p>';
         } else {
             artists.forEach(artist => {
+                const artistImageUrl = convertGoogleDriveUrl(artist.imageUrl);
                 artistsHtml += `
                     <div class="artist-card">
-                        <img src="${artist.imageUrl || 'placeholder-artist.png'}" alt="${artist.name}">
+                        <img src="${artistImageUrl || 'Images/placeholder-artist.png'}" alt="${artist.name}">
                         <h4>${artist.name}</h4>
                         <p>${artist.specialty}</p>
                     </div>
@@ -145,5 +160,6 @@ async function loadAllArtists() {
     } catch (error) {
         console.error('Error loading artists:', error);
         $('.artist-list').html('<p>Error loading artists.</p>');
+        $('#cors-error-message').html('<strong>Error:</strong> Could not load artist data. This may be a permission issue with the backend Google Apps Script. See the <a href="README.md" target="_blank">README.md</a> file for troubleshooting steps.').show();
     }
 }
