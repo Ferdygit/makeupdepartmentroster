@@ -1,7 +1,7 @@
-const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyUX3UITXKZmi_QYjBYcMQ724lJU3X7XKSmGU-6q-tiCWhhDGKlozyvxioxukkptQHNrQ/exec';
+const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzJGIM6Ny_Jq0DQA6AuD9Wwv-gXqLz9bc1KCxfvq2hW0-5pWk8AcCAWb2lLV1NR40TY9g/exec';
 
 let currentDate = null;
-let previewEntries = []; // Array of {date, timeSlot, artistName, program, source: 'local'|'backend'}
+let previewEntries = [];
 
 $(function() {
     // Datepicker for roster date
@@ -28,11 +28,9 @@ $(function() {
         $('.tab-content').hide();
         $('#' + $(this).data('tab')).show();
 
-        if ($(this).data('tab') === 'manageArtists') {
-            loadManageArtists();
-        } else if ($(this).data('tab') === 'managePrograms') {
-            loadManagePrograms();
-        } else if ($(this).data('tab') === 'addEntry') {
+        if ($(this).data('tab') === 'manageArtists') loadManageArtists();
+        else if ($(this).data('tab') === 'managePrograms') loadManagePrograms();
+        else if ($(this).data('tab') === 'addEntry') {
             loadArtistsForSelect();
             loadProgramsForSelect();
         }
@@ -41,7 +39,6 @@ $(function() {
     // Add roster entry to preview table (NOT backend!)
     $('#addRosterForm').on('submit', function(e) {
         e.preventDefault();
-
         const date = $('#rosterDate').val();
         const artistName = $('#rosterArtist').val();
         const timeSlot = $('#rosterTimeSlot').val();
@@ -52,18 +49,11 @@ $(function() {
             return;
         }
 
-        previewEntries.push({
-            date,
-            timeSlot,
-            artistName,
-            program,
-            source: 'local'
-        });
+        previewEntries.push({ date, timeSlot, artistName, program, source: 'local' });
         renderPreviewTable();
         $('#rosterArtist').val('');
         $('#rosterTimeSlot').val('');
         $('#rosterProgram').val('');
-        // Do NOT reset the whole form, so the date stays!
     });
 
     // Click: batch submit all previewed entries to backend
@@ -127,16 +117,13 @@ $(function() {
     });
 });
 
-// Helper: Set selected date and load all roster entries for that date
 function setSelectedDate(date) {
     currentDate = date;
     $('#rosterDate').val(date);
 
     fetch(`${APPS_SCRIPT_WEB_APP_URL}?sheet=Roster&date=${date}&type=flat`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
         })
         .then(data => {
@@ -162,22 +149,14 @@ function setSelectedDate(date) {
         });
 }
 
-// Draw preview table
 function renderPreviewTable() {
     const tbody = $('#previewRosterTable tbody');
     tbody.empty();
-
     if (previewEntries.length === 0) {
         $('#previewRosterTable').hide();
         $('#previewRosterEmpty').show();
         return;
     }
-function formatDisplayDate(dateStr) {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    const d = new Date(dateStr);
-    if (isNaN(d)) return dateStr;
-    return d.toISOString().slice(0, 10);
-}
     $('#previewRosterTable').show();
     $('#previewRosterEmpty').hide();
 
@@ -185,12 +164,12 @@ function formatDisplayDate(dateStr) {
         const isDelete = entry._delete;
         tbody.append(`
             <tr style="${isDelete ? "text-decoration:line-through;background:#fbeaea;" : ""}">
-                <td>${formatDisplayDate(entry.date)}</td>
+                <td>${entry.date}</td>
                 <td>${entry.timeSlot}</td>
                 <td>${entry.artistName}</td>
                 <td>${entry.program}</td>
                 <td>
-                    <button type="button" class="add-new-artist-program-btn delete-entry-btn" data-idx="${idx}">
+                    <button type="button" class="delete-entry-btn" data-idx="${idx}">
                         ${entry.source === 'backend' ? (isDelete ? 'Undo' : 'Delete') : 'Delete'}
                     </button>
                 </td>
@@ -199,10 +178,10 @@ function formatDisplayDate(dateStr) {
     });
 }
 
-// Dropdown loads for Add Entry
 async function loadArtistsForSelect() {
     try {
         const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllArtists`);
+        if (!response.ok) throw new Error("Network response was not ok");
         const artists = await response.json();
         const select = $('#rosterArtist');
         select.empty();
@@ -217,6 +196,7 @@ async function loadArtistsForSelect() {
 async function loadProgramsForSelect() {
     try {
         const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllPrograms`);
+        if (!response.ok) throw new Error("Network response was not ok");
         const programs = await response.json();
         const select = $('#rosterProgram');
         select.empty();
@@ -241,6 +221,7 @@ async function loadManageArtists() {
     listDiv.html('<p>Loading artists...</p>');
     try {
         const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllArtists`);
+        if (!response.ok) throw new Error("Network response was not ok");
         const artists = await response.json();
         let tableHtml = `<table class="manage-table">
             <thead>
@@ -273,12 +254,12 @@ async function loadManageArtists() {
     }
 }
 
-// --- Manage Programs Tab ---
 async function loadManagePrograms() {
     const listDiv = $('#programsList');
     listDiv.html('<p>Loading programs...</p>');
     try {
         const response = await fetch(`${APPS_SCRIPT_WEB_APP_URL}?type=getAllPrograms`);
+        if (!response.ok) throw new Error("Network response was not ok");
         const programs = await response.json();
         let tableHtml = `<table class="manage-table">
             <thead>
@@ -381,12 +362,42 @@ $('#addProgramForm').on('submit', async function(e) {
 // --- Delete Functions ---
 async function deleteArtist(id) {
     if (!confirm('Are you sure you want to delete this artist?')) return;
-    // Implement the deletion logic as per your backend (not shown here)
-    // ...
+    const payload = { action: "deleteArtist", data: { id } };
+    try {
+        const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.success) {
+            displayMessage('artistMessage', 'Artist deleted successfully!', 'success');
+            loadManageArtists();
+        } else {
+            displayMessage('artistMessage', result.error || 'Error deleting artist.', 'error');
+        }
+    } catch (err) {
+        displayMessage('artistMessage', 'Network/server error.', 'error');
+    }
 }
 
 async function deleteProgram(id) {
     if (!confirm('Are you sure you want to delete this program?')) return;
-    // Implement the deletion logic as per your backend (not shown here)
-    // ...
+    const payload = { action: "deleteProgram", data: { id } };
+    try {
+        const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.success) {
+            displayMessage('programMessage', 'Program deleted successfully!', 'success');
+            loadManagePrograms();
+        } else {
+            displayMessage('programMessage', result.error || 'Error deleting program.', 'error');
+        }
+    } catch (err) {
+        displayMessage('programMessage', 'Network/server error.', 'error');
+    }
 }

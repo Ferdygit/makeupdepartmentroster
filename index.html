@@ -13,12 +13,10 @@
 <body>
     <header class="main-header">
         <section>
-        <img src="Images/DTV-Logo.gif" alt="TV Derana Logo" class="header-logo">
-        <img src="Images/DTV-makeup-logo.jpg" alt="TV Derana Logo" class="header-logo">
+            <img src="Images/DTV-Logo.gif" alt="TV Derana Logo" class="header-logo">
+            <img src="Images/DTV-makeup-logo.jpg" alt="TV Derana Logo" class="header-logo">
         </section>
-
         <h1>Daily Roster - Makeup Dep.</h1>
-
         <button id="adminLoginBtn" class="admin-login-btn">Admin Login</button>
     </header>
 
@@ -41,8 +39,7 @@
 
         <section class="our-makeup-artists">
             <h2>Our Makeup Artists</h2>
-            <div class="artist-list">
-                </div>
+            <div class="artist-list"></div>
         </section>
     </main>
 
@@ -51,24 +48,24 @@
     </footer>
 
     <div id="adminModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>Admin Login</h2>
-        <form id="adminLoginForm">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" id="submitLoginBtn">Login</button>
-            <p class="error-message" id="loginErrorMessage"></p>
-        </form>
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Admin Login</h2>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" id="submitLoginBtn">Login</button>
+                <p class="error-message" id="loginErrorMessage"></p>
+            </form>
+        </div>
     </div>
-</div>
 
-<script src="js/script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
