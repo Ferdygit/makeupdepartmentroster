@@ -164,18 +164,28 @@ function renderPreviewTable() {
         const isDelete = entry._delete;
         tbody.append(`
             <tr style="${isDelete ? "text-decoration:line-through;background:#fbeaea;" : ""}">
-                <td>${entry.date}</td>
+                <td>${formatDisplayDate(entry.date)}</td>
                 <td>${entry.timeSlot}</td>
                 <td>${entry.artistName}</td>
                 <td>${entry.program}</td>
                 <td>
-                    <button type="button" class="delete-entry-btn" data-idx="${idx}">
+                    <button type="button" class="add-new-artist-program-btn delete-entry-btn" data-idx="${idx}">
                         ${entry.source === 'backend' ? (isDelete ? 'Undo' : 'Delete') : 'Delete'}
                     </button>
                 </td>
             </tr>
         `);
     });
+}
+
+// Place this helper anywhere in your admin.js
+function formatDisplayDate(dateStr) {
+    if (!dateStr) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    if (dateStr.indexOf('T') > 0) return dateStr.split('T')[0];
+    const d = new Date(dateStr);
+    if (!isNaN(d)) return d.toISOString().slice(0, 10);
+    return dateStr;
 }
 
 async function loadArtistsForSelect() {

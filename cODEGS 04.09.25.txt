@@ -1,0 +1,393 @@
+const SPREADSHEET_ID = '134cgV74G23sknE_w-RAKIItRKKAASyE84Lt8bErydbw';
+
+function doGet(e) {
+  const sheetName = e.parameter.sheet;
+  const date = e.parameter.date;
+  const type = e.parameter.type;
+
+  try {
+    if (type === 'getAllArtists') {
+      return handleGetAllArtists();
+    } else if (type === 'getAllPrograms') {
+      return handleGetAllPrograms();
+    } else if (type === 'flat' && sheetName === 'Roster' && date) {
+      return handleGetRosterAsFlatArray(date);
+    } else if (sheetName === 'Roster' && date) {
+      return handleGetRosterByDateForPublic(date);
+    } else if (sheetName === 'Roster_Admin' && date) {
+      return handleGetRosterByDateForAdmin(date);
+    } else {
+      throw new Error('Invalid GET request.');
+    }
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    const requestBody = JSON.parse(e.postData.contents);
+    const action = requestBody.action;
+    const data = requestBody.data;
+
+    switch (action) {
+      case 'updateDailyRoster':
+        return handleUpdateDailyRoster(data);
+      case 'addArtist':
+        return handleAddArtist(data);
+      case 'addProgram':
+        return handleAddProgram(data);
+      case 'batchRoster':
+        return handleBatchRoster(data);
+      case 'deleteArtist':
+        return handleDeleteArtist(data.id);
+      case 'deleteProgram':
+        return handleDeleteProgram(data.id);
+      default:
+        throw new Error('Invalid action: ' + action);
+    }
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// --- Utility function for normalization ---
+function normalize(val) {
+  return String(val).trim();
+}
+
+// --- Roster Handlers ---
+
+function handleGetRosterAsFlatArray(dateString) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const rosterSheet = ss.getSheetByName('Roster');
+  if (!rosterSheet) throw new Error('Sheet "Roster" not found.');
+
+  const data = rosterSheet.getDataRange().getValues();
+  const headers = data[0];
+  const dateIndex = headers.indexOf('Date');
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    // Always extract only the date part before displaying
+    const rowDateRaw = row[dateIndex];
+    const rowDate = String(rowDateRaw).split('T')[0];
+    if (rowDate === dateString) {
+      rows.push({
+        date: rowDateRaw,
+        time: row[headers.indexOf('Time Slot')],
+        artist: row[headers.indexOf('Artist Name')],
+        task: row[headers.indexOf('Program')]
+      });
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify(rows)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleBatchRoster(data) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const rosterSheet = ss.getSheetByName('Roster');
+  if (!rosterSheet) throw new Error('Sheet "Roster" not found.');
+
+  const headers = rosterSheet.getDataRange().getValues()[0];
+  let successAdds = 0, successDeletes = 0;
+  let errors = [];
+
+  // --- DEBUG: Log batch data received ---
+  Logger.log('BatchRoster data received: ' + JSON.stringify(data));
+
+  // Handle deletions
+  if (Array.isArray(data.delete)) {
+    data.delete.forEach(delEntry => {
+      const allData = rosterSheet.getDataRange().getValues();
+      let found = false;
+      for (let i = allData.length - 1; i >= 1; i--) {
+        const row = allData[i];
+
+        // --- DEBUG: Log values being compared ---
+        let sheetDateRaw = normalize(row[headers.indexOf('Date')]);
+        let delDateRaw = normalize(delEntry.date);
+
+        // Try to extract date part if ISO format
+        let sheetDate = sheetDateRaw.split('T')[0];
+        let delDate = delDateRaw.split('T')[0];
+
+        Logger.log('Comparing row for deletion:');
+        Logger.log({
+          sheetDate: sheetDate,
+          sheetTime: normalize(row[headers.indexOf('Time Slot')]),
+          sheetArtist: normalize(row[headers.indexOf('Artist Name')]),
+          sheetProgram: normalize(row[headers.indexOf('Program')]),
+          delDate: delDate,
+          delTime: normalize(delEntry.time),
+          delArtist: normalize(delEntry.artist),
+          delProgram: normalize(delEntry.task)
+        });
+
+        if (
+          sheetDate === delDate &&
+          normalize(row[headers.indexOf('Time Slot')]) === normalize(delEntry.time) &&
+          normalize(row[headers.indexOf('Artist Name')]) === normalize(delEntry.artist) &&
+          normalize(row[headers.indexOf('Program')]) === normalize(delEntry.task)
+        ) {
+          Logger.log('MATCH FOUND. Deleting row: ' + (i + 1));
+          rosterSheet.deleteRow(i + 1);
+          successDeletes++;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        Logger.log('NO MATCH found for delEntry: ' + JSON.stringify(delEntry));
+      }
+    });
+  }
+
+  // Handle adds
+  if (Array.isArray(data.add)) {
+    data.add.forEach(addEntry => {
+      try {
+        // --- DEBUG: Log addEntry before appending ---
+        Logger.log('Adding row: ' + JSON.stringify(addEntry));
+        rosterSheet.appendRow([
+          addEntry.date,
+          addEntry.time,
+          addEntry.artist,
+          addEntry.task
+        ]);
+        successAdds++;
+      } catch (e) {
+        errors.push(e.message);
+        Logger.log('Error adding row: ' + e.message);
+      }
+    });
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    added: successAdds,
+    deleted: successDeletes,
+    errors: errors
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleGetRosterByDateForPublic(dateString) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const rosterSheet = ss.getSheetByName('Roster');
+  const artistsSheet = ss.getSheetByName('Artists');
+  const programsSheet = ss.getSheetByName('Programs');
+
+  const rosterData = rosterSheet.getDataRange().getValues();
+  const artistsData = artistsSheet.getDataRange().getValues();
+  const programsData = programsSheet.getDataRange().getValues();
+
+  const headersRoster = rosterData[0];
+  const headersArtists = artistsData[0];
+  const headersPrograms = programsData[0];
+
+  const filteredRoster = rosterData.slice(1).filter(row => {
+    const rowDateRaw = row[headersRoster.indexOf('Date')];
+    const rowDate = String(rowDateRaw).split('T')[0];
+    return rowDate === dateString;
+  });
+
+  const result = {};
+
+  filteredRoster.forEach(row => {
+    const programName = row[headersRoster.indexOf('Program')];
+    const artistName = row[headersRoster.indexOf('Artist Name')];
+    const timeSlot = row[headersRoster.indexOf('Time Slot')];
+
+    if (!result[programName]) {
+      result[programName] = {
+        programDetails: {},
+        artists: []
+      };
+      const programRow = programsData.slice(1).find(pRow =>
+        pRow[headersPrograms.indexOf('Program Name')] &&
+        pRow[headersPrograms.indexOf('Program Name')].toString().trim() === programName.toString().trim()
+      );
+      if (programRow) {
+        result[programName].programDetails = {
+          name: programRow[headersPrograms.indexOf('Program Name')],
+          description: programRow[headersPrograms.indexOf('Description')],
+          photoUrl: programRow[headersPrograms.indexOf('PhotoURL')]
+        };
+      }
+    }
+
+    const artistRow = artistsData.slice(1).find(aRow =>
+      aRow[headersArtists.indexOf('Artist Name')] &&
+      aRow[headersArtists.indexOf('Artist Name')].toString().trim() === artistName.toString().trim()
+    );
+    if (artistRow) {
+      result[programName].artists.push({
+        name: artistName,
+        timeSlot: timeSlot,
+        imageUrl: artistRow[headersArtists.indexOf('Image URL')]
+      });
+    }
+  });
+
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleGetRosterByDateForAdmin(dateString) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const rosterSheet = ss.getSheetByName('Roster');
+  if (!rosterSheet) throw new Error('Sheet "Roster" not found.');
+
+  const data = rosterSheet.getDataRange().getValues();
+  if (data.length < 2) {
+    return ContentService.createTextOutput(JSON.stringify({ success: true, data: [] }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const headers = data[0];
+  const dateIndex = headers.indexOf('Date');
+  const dailyRoster = [];
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    // Always extract only the date part before displaying
+    const rowDateRaw = row[dateIndex];
+    const rowDate = String(rowDateRaw).split('T')[0];
+    if (rowDate === dateString) {
+      dailyRoster.push({
+        Date: rowDateRaw,
+        'Time Slot': row[headers.indexOf('Time Slot')],
+        'Artist Name': row[headers.indexOf('Artist Name')],
+        'Program': row[headers.indexOf('Program')]
+      });
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ success: true, data: dailyRoster }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// --- Artist & Program Handlers ---
+
+function handleGetAllArtists() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Artists');
+  if (!sheet) throw new Error('Sheet "Artists" not found.');
+
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const result = data.slice(1).map(row => {
+    const obj = {};
+    for (let i = 0; i < headers.length; i++) obj[headers[i]] = row[i];
+    return obj;
+  });
+
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleGetAllPrograms() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Programs');
+  if (!sheet) throw new Error('Sheet "Programs" not found.');
+
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const result = data.slice(1).map(row => {
+    const obj = {};
+    for (let i = 0; i < headers.length; i++) obj[headers[i]] = row[i];
+    return obj;
+  });
+
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleAddArtist(data) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Artists');
+  if (!sheet) throw new Error('Sheet "Artists" not found.');
+
+  try {
+    const newID = generateNewID('DTVMD', sheet);
+    sheet.appendRow([data.name, data.specialty, data.imageUrl, newID]);
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Artist added successfully.', artistId: newID }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (e) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: e.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleAddProgram(data) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Programs');
+  if (!sheet) throw new Error('Sheet "Programs" not found.');
+
+  try {
+    const newID = generateNewID('DTVP', sheet);
+    sheet.appendRow([data.name, data.description, data.photoUrl, newID]);
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Program added successfully.', programId: newID }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (e) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: e.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleDeleteArtist(id) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Artists');
+  if (!sheet) throw new Error('Sheet "Artists" not found.');
+
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const idCol = headers.indexOf('ID');
+  if (idCol === -1) throw new Error('ID column not found in Artists.');
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][idCol]) === String(id)) {
+      sheet.deleteRow(i + 1);
+      return ContentService.createTextOutput(JSON.stringify({ success: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'Artist not found.' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleDeleteProgram(id) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Programs');
+  if (!sheet) throw new Error('Sheet "Programs" not found.');
+
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const idCol = headers.indexOf('ID');
+  if (idCol === -1) throw new Error('ID column not found in Programs.');
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][idCol]) === String(id)) {
+      sheet.deleteRow(i + 1);
+      return ContentService.createTextOutput(JSON.stringify({ success: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'Program not found.' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// --- Utility ---
+function generateNewID(prefix, sheet) {
+  const lastRow = sheet.getLastRow();
+  let lastID = 0;
+  if (lastRow > 1) {
+    const idColumnIndex = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].indexOf('ID');
+    if (idColumnIndex !== -1) {
+      const lastIDValue = sheet.getRange(lastRow, idColumnIndex + 1).getValue();
+      const numPart = parseInt(lastIDValue.replace(prefix, ''));
+      if (!isNaN(numPart)) lastID = numPart;
+    }
+  }
+  return prefix + String(lastID + 1).padStart(3, '0');
+}
