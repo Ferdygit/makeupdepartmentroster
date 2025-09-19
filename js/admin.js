@@ -78,7 +78,7 @@ $(function() {
                     task: e.program
                 })),
                 delete: deleteEntries.map(e => ({
-                    date: e.date,
+                    date: formatDisplayDate(e.date),
                     time: e.timeSlot,
                     artist: e.artistName,
                     task: e.program
