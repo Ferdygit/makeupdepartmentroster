@@ -429,7 +429,12 @@ footer {
 }
 
 .tab-content {
+    display: none; /* bütün tab içeriklerini varsayılan olarak gizle */
     padding: 20px 0;
+}
+
+.tab-content.active {
+    display: block; /* sadece aktif olanı göster */
 }
 
 .admin-form-group {
